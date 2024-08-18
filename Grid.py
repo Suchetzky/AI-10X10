@@ -1,10 +1,10 @@
-import pygame
-import random
+from tkinter import Canvas
 
 # Define colors
-black = (0, 0, 0)
-white = (255, 255, 255)
-blue = (0, 0, 255)
+black = 'black'
+white = 'white'
+blue = 'blue'
+
 class Grid:
     def __init__(self, width, height, size):
         self.width = width
@@ -12,12 +12,15 @@ class Grid:
         self.size = size
         self.grid = [[0 for _ in range(width)] for _ in range(height)]
 
-    def draw(self, screen):
+    def draw(self, canvas: Canvas):
         for row in range(self.height):
             for col in range(self.width):
                 color = white if self.grid[row][col] == 0 else blue
-                pygame.draw.rect(screen, color, (col * self.size, row * self.size, self.size, self.size))
-                pygame.draw.rect(screen, black, (col * self.size, row * self.size, self.size, self.size), 1)
+                x1 = col * self.size
+                y1 = row * self.size
+                x2 = x1 + self.size
+                y2 = y1 + self.size
+                canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=black)
 
     def place_shape(self, shape, x, y):
         for row in range(len(shape)):
@@ -36,15 +39,16 @@ class Grid:
         return True
 
     def clear_lines(self):
-        new_grid = [row for row in self.grid if any(cell == 0 for cell in row)]
-        lines_cleared = self.height - len(new_grid)
-        self.grid = [[0] * self.width for _ in range(lines_cleared)] + new_grid
-
-        # Clear columns
-        for col in range(self.width):
-            if all(self.grid[row][col] == 1 for row in range(self.height)):
-                for row in range(self.height):
-                    self.grid[row][col] = 0
+        lines_cleared = 0
+        for row in range(self.height):
+            if all(self.grid[row]):
                 lines_cleared += 1
-
-        return lines_cleared * 10
+                for i in range(10):
+                    self.grid[row][i] = 0
+        # clear columns
+        for col in range(self.width):
+            if all([self.grid[row][col] for row in range(self.height)]):
+                lines_cleared += 1
+                for i in range(10):
+                    self.grid[i][col] = 0
+        return 10 * lines_cleared
