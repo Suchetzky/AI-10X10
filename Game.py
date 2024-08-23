@@ -144,7 +144,7 @@ class Game:
             self.piece_num = node.action[2]
             self.next_shapes = node.action[3]
             self.place_part_in_board_if_valid(node.action[0], node.action[1])
-            if not self.headless:
+            if not self.headless: # todo: what is this?
                 self.root.after(1000, self.root.update_idletasks)
         if self.is_game_over():
             self.display_game_over()
@@ -171,18 +171,19 @@ class Game:
 
     def get_successors(self):
         successors = []
-        self.add_next_shapes()
+        if len(self.next_shapes) == 0: # just if we finish the shapes batch we will randomly add 3 new shapes
+            self.add_next_shapes() # todo: why its always 3?
         for piece_num in range(len(self.next_shapes)):
             for x, y in self.get_board_available_places(self.next_shapes[piece_num].shape):
                 new_game = self.deepcopy()
                 new_game.piece_num = piece_num
                 new_game.place_part_in_board_if_valid(x, y)
-                successors.append((new_game, Node((x, y, piece_num, self.next_shapes))))
+                successors.append((new_game, Node((x, y, piece_num, self.next_shapes)))) # todo : why tuple?
         # print(len(successors)) # todo remove
         return successors
 
     def is_goal_state(self):
-        return self.score >= 100000
+        return self.score >= 100
 
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
@@ -223,9 +224,14 @@ def bfs_dfs_helper(data_type, game): # todo check
 
 ########################################################
 
+def print_path(path):
+    for node in path:
+        print(node.action)
+
 if __name__ == '__main__':
-    initial_game = Game(False, 5, 50)
+    initial_game = Game(False, 3, 50)
     # initial_game.run() # run the game
     solution_path = depth_first_search(initial_game)
+    print_path(solution_path)
     print("Solution Path:", solution_path)
     initial_game.run_from_code(solution_path) # run the game with the solution path
