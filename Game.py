@@ -68,7 +68,7 @@ class Game:
             self.current_y += dy
             self.draw()
 
-    def rotate_piece(self, event):
+    def rotate_piece(self, event): # todo change shape?
         if self.next_shapes:
             self.piece_num = (self.piece_num + 1) % len(self.next_shapes)
             self.draw()
@@ -85,7 +85,7 @@ class Game:
                 new_shape = Shape()
             self.next_shapes.append(new_shape)
 
-    def place_part_in_board_if_valid(self, x, y):
+    def place_part_in_board_if_valid(self, x, y): # todo check
         if self.grid.can_place(self.next_shapes[self.piece_num].shape, x, y, check_placement=True):
             self.score += self.next_shapes[self.piece_num].get_part_size()
             self.grid.place_shape(self.next_shapes[self.piece_num].shape, x, y)
@@ -107,7 +107,7 @@ class Game:
                 return True
         return False
 
-    def get_board_available_places(self, shape):
+    def get_board_available_places(self, shape): # for bfs/dfs
         available_places = []
         for y in range(self.grid.height):
             for x in range(self.grid.width):
@@ -176,11 +176,11 @@ class Game:
                 new_game.piece_num = piece_num
                 new_game.place_part_in_board_if_valid(x, y)
                 successors.append((new_game, Node((x, y, piece_num, self.next_shapes))))
-        print(len(successors))
+        # print(len(successors)) # todo remove
         return successors
 
     def is_goal_state(self):
-        return self.score >= 100000
+        return self.score >= 10000
 
     def deepcopy(self):
         new_game = Game(NoUI=True)
@@ -203,7 +203,7 @@ def breadth_first_search(problem):
     queue = Queue()
     return bfs_dfs_helper(queue, problem)
 
-def bfs_dfs_helper(data_type, game):
+def bfs_dfs_helper(data_type, game): # todo check
     data_type.push((game, []))
     visited = set()
 
@@ -223,7 +223,7 @@ def bfs_dfs_helper(data_type, game):
 
 if __name__ == '__main__':
     initial_game = Game(NoUI=False)
-    #initial_game.run()
+    # initial_game.run() # run the game
     solution_path = depth_first_search(initial_game)
     print("Solution Path:", solution_path)
-    initial_game.run_from_code(solution_path)
+    initial_game.run_from_code(solution_path) # run the game with the solution path
