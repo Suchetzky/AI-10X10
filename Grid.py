@@ -9,7 +9,7 @@ class Grid:
     def __init__(self, width, height, size):
         self.width = width
         self.height = height
-        self.size = size
+        self.size = size # todo: size of each cell?
         self.grid = [[0 for _ in range(width)] for _ in range(height)]
 
     def draw(self, canvas: Canvas):
@@ -41,14 +41,17 @@ class Grid:
     def clear_lines(self):
         lines_cleared = 0
         for row in range(self.height):
-            if all(self.grid[row]):
-                lines_cleared += 1
-                for i in range(10):
-                    self.grid[row][i] = 0
+            try:
+                if all(self.grid[row]):
+                    lines_cleared += 1
+                    for i in range(self.height):
+                        self.grid[row][i] = 0
+            except IndexError:
+                print(self.grid, "\n row:" ,row, "\n ")
         # clear columns
         for col in range(self.width):
             if all([self.grid[row][col] for row in range(self.height)]):
                 lines_cleared += 1
-                for i in range(10):
+                for i in range(self.width):
                     self.grid[i][col] = 0
-        return 10 * lines_cleared
+        return self.width * lines_cleared

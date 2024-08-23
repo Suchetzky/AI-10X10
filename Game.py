@@ -9,8 +9,10 @@ from util import Node
 screen_width, screen_height = 500, 550
 
 class Game:
-    def __init__(self, NoUI=False):
-        self.grid = Grid(10, 10, 50)
+    def __init__(self, NoUI=False, board_len=10, size=50):
+        self.board_len = board_len
+        self.size = size
+        self.grid = Grid(board_len, board_len, size)
         self.next_shapes = []
         self.add_next_shapes()
         self.placed_pieces = 0
@@ -45,7 +47,7 @@ class Game:
         self.grid.draw(self.canvas)
         if self.next_shapes:
             self.next_shapes[self.piece_num].draw(self.canvas, self.current_x, self.current_y, self.grid.size)
-        self.canvas.create_text(10, screen_height - 40, anchor='nw', text=f'Score: {self.score}', fill='white', font=self.font)
+        self.canvas.create_text(self.board_len, screen_height - 40, anchor='nw', text=f'Score: {self.score}', fill='white', font=self.font)
         self.root.update()
 
     ########## GAME MOVEMENT ##########
@@ -180,11 +182,11 @@ class Game:
         return successors
 
     def is_goal_state(self):
-        return self.score >= 10000
+        return self.score >= 100000
 
     def deepcopy(self):
-        new_game = Game(NoUI=True)
-        new_game.grid = Grid(10, 10, 50)
+        new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
+        new_game.grid = Grid(self.board_len, self.board_len, self.size)
         new_game.grid.grid = [row[:] for row in self.grid.grid]
         new_game.next_shapes = self.next_shapes.copy()
         new_game.piece_num = self.piece_num
@@ -222,7 +224,7 @@ def bfs_dfs_helper(data_type, game): # todo check
 ########################################################
 
 if __name__ == '__main__':
-    initial_game = Game(NoUI=False)
+    initial_game = Game(False, 5, 50)
     # initial_game.run() # run the game
     solution_path = depth_first_search(initial_game)
     print("Solution Path:", solution_path)
