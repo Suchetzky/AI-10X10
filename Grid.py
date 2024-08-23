@@ -39,19 +39,33 @@ class Grid:
         return True
 
     def clear_lines(self):
-        lines_cleared = 0
+        rows_to_clear = []
+        columns_to_clear = []
+        
+        # save all rows that need to be cleared
         for row in range(self.height):
-            try:
-                if all(self.grid[row]):
-                    lines_cleared += 1
-                    for i in range(self.height):
-                        self.grid[row][i] = 0
-            except IndexError:
-                print(self.grid, "\n row:" ,row, "\n ")
-        # clear columns
+            if all(self.grid[row]):
+                rows_to_clear.append(row)
+
+        # save all columns that need to be cleared
         for col in range(self.width):
             if all([self.grid[row][col] for row in range(self.height)]):
-                lines_cleared += 1
-                for i in range(self.width):
-                    self.grid[i][col] = 0
-        return self.width * lines_cleared
+                columns_to_clear.append(col)
+       
+       # clear all rows and columns
+        for row in rows_to_clear:
+            self.clear_single_line(row)
+        
+        for col in columns_to_clear:
+            self.clear_single_column(col)
+        
+            
+        return self.width * (len(rows_to_clear) + len(columns_to_clear))
+
+    def clear_single_column(self, col):
+        for i in range(self.width):
+            self.grid[i][col] = 0
+
+    def clear_single_line(self, row):
+        for i in range(self.height):
+            self.grid[row][i] = 0
