@@ -20,7 +20,7 @@ class Game:
         self.current_x = 0
         self.current_y = 0
         self.score = 0
-        self.headless = NoUI
+        self.headless = NoUI # game is runninf with or without graphical interface
         self.running = True
         if not self.headless:
             self._setup_ui()
@@ -224,14 +224,15 @@ def bfs_dfs_helper(data_type, game): # todo check
 
 ########################################################
 
-def print_path(path):
-    for node in path:
-        print(node.action)
+# def print_path(path):
+#     for node in path:
+#         print(node.action)
+
 
 if __name__ == '__main__':
-    initial_game = Game(False, 3, 50)
+    initial_game = Game(False, 5, 50) # false- no UI, 5- board size, 50- cell size
     # initial_game.run() # run the game
     solution_path = depth_first_search(initial_game)
-    print_path(solution_path)
+    # print_path(solution_path)
     print("Solution Path:", solution_path)
     initial_game.run_from_code(solution_path) # run the game with the solution path
