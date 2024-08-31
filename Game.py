@@ -105,7 +105,7 @@ class Game:
             else:
                 self.piece_num = min(self.piece_num, len(self.next_shapes) - 1)
             self.current_x, self.current_y = 0, 0
-            self.draw()
+            # self.draw() #todo why her?
 
     def has_valid_placement(self):
         for shape in self.next_shapes:
@@ -147,6 +147,7 @@ class Game:
         for node in nodes:
             self.piece_num = node.action[2]
             self.next_shapes = node.action[3]
+            self.draw()
             self.place_part_in_board_if_valid(node.action[0], node.action[1])
             if not self.headless: # todo: what is this?
                 self.root.after(1000, self.root.update_idletasks)
@@ -195,7 +196,7 @@ class Game:
         return successors
 
     def is_goal_state(self):
-        return self.score >= 100
+        return self.score >= 10000
 
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
@@ -261,7 +262,7 @@ def bfs_dfs_helper(data_type, game): # todo check
 
 
 if __name__ == '__main__':
-    initial_game = Game(False, 4, 50, False) # false- no UI, 5- board size, 50- cell size
+    initial_game = Game(False, 5, 50, False) # false- no UI, 5- board size, 50- cell size
     # initial_game.test()
     # initial_game.run() # run the game
     solution_path, grid = depth_first_search(initial_game)
