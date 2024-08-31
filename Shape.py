@@ -181,6 +181,9 @@ class Shape:
     def get_shape(self):
         return self.shape
 
+    def get_shape_num(self):
+        return self.shapes.index(self.shape)
+
     # equal is the same shape
     def __eq__(self, other):
         return self.shape == other.shape

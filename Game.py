@@ -10,7 +10,7 @@ import util
 screen_width, screen_height = 500, 550
 
 class Game:
-    def __init__(self, NoUI=False, board_len=10, size=50, test = False):
+    def __init__(self, NoUI=False, board_len=10, size=50, test=False):
         self.board_len = board_len
         self.size = size
         self.grid = Grid(board_len, board_len, size)
@@ -90,6 +90,32 @@ class Game:
             while new_shape in self.next_shapes:
                 new_shape = Shape()
             self.next_shapes.append(new_shape)
+
+
+        # get coordinates and check if the placement of self.next_shapes[self.piece_num] is valid
+        # if so, place the shape in the board and clear lines if needed and update the score
+    def place_part_in_board_if_valid_by_shape(self, action):  # todo check
+        x, y, piece_num, next_shapes = action[1].action
+        shape =  next_shapes[piece_num]
+        print(self.next_shapes)
+        if shape not in self.next_shapes:
+            return
+        if self.grid.can_place(shape, x, y, check_placement=True):
+            self.score += shape.get_part_size()
+            self.grid.place_shape(shape.shape, x, y)
+            self.score += self.grid.clear_lines()
+            self.next_shapes.pop(shape.get_shape_num())
+            self.placed_pieces += 1
+            if self.placed_pieces == 3:
+                self.add_next_shapes()
+                self.placed_pieces = 0
+                self.piece_num = 0
+            else:
+                self.piece_num = min(self.piece_num, len(self.next_shapes) - 1)
+            self.current_x, self.current_y = 0, 0
+            # self.draw() #todo why her?
+
+
     # get coordinates and check if the placement of self.next_shapes[self.piece_num] is valid
     # if so, place the shape in the board and clear lines if needed and update the score
     def place_part_in_board_if_valid(self, x, y): # todo check
@@ -175,6 +201,7 @@ class Game:
                 if self.grid.can_place(shape, x, y):
                     valid_placements.append((x, y))
         return valid_placements
+
     def get_valid_placements(self):
         valid_placements = []
         for y in range(self.grid.height):

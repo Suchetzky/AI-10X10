@@ -4,6 +4,7 @@ import util
 from Game import Game
 import abc
 from util import Node as Action
+import time
 
 class Agent(object):
     def __init__(self):
@@ -158,10 +159,51 @@ def better_evaluation_function(current_game_state):
     util.raiseNotDefined()
 
 
+
+class Game_runner(object):
+    def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), display=None, sleep_between_actions=False):
+        super(Game_runner, self).__init__()
+        self.sleep_between_actions = sleep_between_actions
+        self.agent = agent
+        # self.display = display
+        self.opponent_agent = opponent_agent
+        self._state = None
+        self._should_quit = False
+
+    def run(self, initial_state):
+        self._should_quit = False
+        self._state = initial_state
+        # self.display.initialize(initial_state)
+        return self._game_loop()
+
+    def quit(self):
+        self._should_quit = True
+        self.agent.stop_running()
+        self.opponent_agent.stop_running()
+
+    def _game_loop(self):
+        while not self._state.is_goal_state() and not self._should_quit:
+            if self.sleep_between_actions:
+                time.sleep(1)
+            # self.display.mainloop_iteration()
+            action = self.agent.get_action(self._state)
+            # if action.is_goal_state() >= Action.STOP:
+            #     return
+            self._state.place_part_in_board_if_valid_by_shape(action) # apply action
+            opponent_action = self.opponent_agent.get_action(self._state)
+            self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
+            # self.display.update_state(self._state, action, opponent_action)
+            self._state.draw()
+        return self._state.score
+
+
+
 # Abbreviation
 better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 5, 50, False)
     agent = ReflexAgent()
-    agent.get_action(initial_game)
+    game_runner = Game_runner(agent, agent)
+    game_runner.run(initial_game)
+    # agent.get_action(initial_game)
