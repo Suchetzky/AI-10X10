@@ -8,29 +8,30 @@ blue = 'blue'
 
 class Shape:
     shapes = [
-        # Shape 1
+        # Shape 0
         [[1, 1], [1, 1]],  # Original
 
         # * *
         # * *
 
-        # Shape 2
+        # Shape 1
         [[1, 1, 1], [1, 1, 1], [1, 1, 1]],  # Original
 
         # * * *
         # * * *
         # * * *
 
-        # Shape 3
+        # Shape 2
         [[1]],  # Original
 
         # *
 
-        # Shape 4
+        # Shape 3
         [[1, 1]],  # Original
 
         # * *
 
+        # shape 4
         [[1], [1]],  # 90 degrees
 
         # *
@@ -42,6 +43,7 @@ class Shape:
 
         # * * *
 
+        # Shape 6
         [[1], [1], [1]],  # 90 degrees
 
         # *
@@ -73,36 +75,40 @@ class Shape:
 
         ###########################################
 
-        # Shape 6
+        # Shape 7
         [[1, 0, 0], [1, 0, 0], [1, 1, 1]],  # Original
 
         # *
         # *
         # * * *
 
+        # Shape 8
         [[1, 1, 1], [0, 0, 1], [0, 0, 1]],  # 90 degrees
 
         # * * *
         #     *
         #     *
 
+        # Shape 9
         [[0, 0, 1], [0, 0, 1], [1, 1, 1]],  # 180 degrees
 
         #     *
         #     *
         # * * *
 
+        # Shape 10
         [[1, 1, 1], [1, 0, 0], [1, 0, 0]],  # 270 degrees
 
         # * * *
         # *
         # *
 
-        # Shape 7
+        # Shape 11
         [[1, 1, 1, 1]],  # Original
 
         # * * * *
 
+        # Shape 12
         [[1], [1], [1], [1]],  # 90 degrees
 
         # *
@@ -110,32 +116,36 @@ class Shape:
         # *
         # *
 
-        # Shape 8
+        # Shape 13
         [[1, 0], [1, 1]],  # Original
 
         # *
         # * *
 
+        # Shape 14
         [[1, 1], [1, 0]],  # 90 degrees
 
         # * *
         # *
 
+        # Shape 15
         [[1, 1], [0, 1]],  # 180 degrees
 
         # * *
         #   *
 
+        # Shape 16
         [[0, 1], [1, 1]],  # 270 degrees
 
         #   *
         # * *
 
-        # Shape 9
+        # Shape 17
         [[1, 1, 1, 1, 1]],  # Original
 
         # * * * * *
 
+        # Shape 18
         [[1], [1], [1], [1], [1]]  # 90 degrees
 
         # *

@@ -28,6 +28,8 @@ class Grid:
                 if shape[row][col] == 1:
                     self.grid[y + row][x + col] = 1
 
+    # return all available index for a shape in the board just border check not the actual placement
+    # if check_placement is True, it will also check if the shape can be placed in the board todo: check
     def can_place(self, shape, x, y, check_placement=False):
         for row in range(len(shape)):
             for col in range(len(shape[0])):
