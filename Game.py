@@ -4,6 +4,7 @@ from Grid import Grid
 from Shape import Shape
 from util import Stack, Queue
 from util import Node
+import util
 
 # Set up display dimensions
 screen_width, screen_height = 500, 550
@@ -209,6 +210,7 @@ class Game:
         new_game.score = self.score
         return new_game
 
+    ###### Halel test ######
     def test(self):
         self.grid.place_shape(Shape.shapes[9], 0, 0)
         for row in self.grid.grid:
@@ -219,6 +221,21 @@ class Game:
         self.place_part_in_board_if_valid(0, 0)
 
         print(self.get_board())
+
+    #### for agents ####
+
+
+
+    def generate_successor(self, action):
+        util.raiseNotDefined()
+        # successor = self.deepcopy()
+        # successor.place_part_in_board_if_valid(action[0], action[1])
+        # return successor
+
+
+
+    #############################
+
 
 
 
