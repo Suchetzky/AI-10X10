@@ -9,12 +9,15 @@ from util import Node
 screen_width, screen_height = 500, 550
 
 class Game:
-    def __init__(self, NoUI=False, board_len=10, size=50):
+    def __init__(self, NoUI=False, board_len=10, size=50, test = False):
         self.board_len = board_len
         self.size = size
         self.grid = Grid(board_len, board_len, size)
         self.next_shapes = []
-        self.add_next_shapes()
+        if not test:
+            self.add_next_shapes()
+        else:
+            self.next_shapes = [Shape(specific_shape_num=0), Shape(specific_shape_num=16), Shape(specific_shape_num=9)]
         self.placed_pieces = 0
         self.piece_num = 0
         self.current_x = 0
@@ -86,7 +89,8 @@ class Game:
             while new_shape in self.next_shapes:
                 new_shape = Shape()
             self.next_shapes.append(new_shape)
-
+    # get coordinates and check if the placement of self.next_shapes[self.piece_num] is valid
+    # if so, place the shape in the board and clear lines if needed and update the score
     def place_part_in_board_if_valid(self, x, y): # todo check
         if self.grid.can_place(self.next_shapes[self.piece_num].shape, x, y, check_placement=True):
             self.score += self.next_shapes[self.piece_num].get_part_size()
@@ -161,6 +165,14 @@ class Game:
     def get_next_shapes(self):
         return [shape.shape for shape in self.next_shapes]
 
+    # get all valid placements for a shape
+    def get_valid_placements(self, shape):
+        valid_placements = []
+        for y in range(self.grid.height):
+            for x in range(self.grid.width):
+                if self.grid.can_place(shape, x, y):
+                    valid_placements.append((x, y))
+        return valid_placements
     def get_valid_placements(self):
         valid_placements = []
         for y in range(self.grid.height):
@@ -196,6 +208,18 @@ class Game:
         new_game.score = self.score
         return new_game
 
+    def test(self):
+        self.grid.place_shape(Shape.shapes[9], 0, 0)
+        for row in self.grid.grid:
+            print(row)
+        print("\n")
+        for row in self.get_board():
+            print(row)
+        self.place_part_in_board_if_valid(0, 0)
+
+        print(self.get_board())
+
+
 
 ######################## DFS BFS ########################
 def depth_first_search(problem):
@@ -207,32 +231,40 @@ def breadth_first_search(problem):
     return bfs_dfs_helper(queue, problem)
 
 def bfs_dfs_helper(data_type, game): # todo check
-    data_type.push((game, []))
+    data_type.push((game, [], []))
     visited = set()
 
     while not data_type.isEmpty():
-        state, path = data_type.pop()
+        state, path, grid = data_type.pop()
         if state.is_goal_state():
-            return path
+            return path, grid
         if state not in visited:
             visited.add(state)
             for successor, actionNode in state.get_successors():
                 if successor not in visited:
                     new_path = path + [actionNode]
-                    data_type.push((successor, new_path))
-    return []
+                    new_grid = [state.get_board()] + [successor.get_board()]
+                    data_type.push((successor, new_path, new_grid))
+    return [], []
 
 ########################################################
 
-# def print_path(path):
-#     for node in path:
-#         print(node.action)
+# def print_path(grid):
+#     for node in grid:
+#         for row in node:
+#             print(row)
+#         print("\n")
+#         # print(node, "\n")
+
+
+
 
 
 if __name__ == '__main__':
-    initial_game = Game(False, 5, 50) # false- no UI, 5- board size, 50- cell size
+    initial_game = Game(False, 4, 50, False) # false- no UI, 5- board size, 50- cell size
+    # initial_game.test()
     # initial_game.run() # run the game
-    solution_path = depth_first_search(initial_game)
-    # print_path(solution_path)
+    solution_path, grid = depth_first_search(initial_game)
+    # print_path(grid)
     print("Solution Path:", solution_path)
     initial_game.run_from_code(solution_path) # run the game with the solution path
