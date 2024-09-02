@@ -5,12 +5,13 @@ from Shape import Shape
 from util import Stack, Queue
 from util import Node
 import util
+import time
 
 # Set up display dimensions
-screen_width, screen_height = 500, 550
+screen_width, screen_height = 900, 700
 
 class Game:
-    def __init__(self, NoUI=False, board_len=10, size=50, test=False):
+    def __init__(self, NoUI=False, board_len=10, size=50, test=False, sleep_between_actions=False):
         self.board_len = board_len
         self.size = size
         self.grid = Grid(board_len, board_len, size)
@@ -19,6 +20,7 @@ class Game:
             self.add_next_shapes()
         else:
             self.next_shapes = [Shape(specific_shape_num=0), Shape(specific_shape_num=16), Shape(specific_shape_num=9)]
+        self.sleep_between_actions = sleep_between_actions
         self.placed_pieces = 0
         self.piece_num = 0
         self.current_x = 0
@@ -51,7 +53,12 @@ class Game:
         self.grid.draw(self.canvas)
         if self.next_shapes:
             self.next_shapes[self.piece_num].draw(self.canvas, self.current_x, self.current_y, self.grid.size)
+            self.root.update()
+            for i in range(len(self.next_shapes)):
+                self.next_shapes[i].draw(self.canvas, self.current_x + 11, self.current_y+(i*6), self.grid.size)
+                self.root.update()
         self.canvas.create_text(self.board_len, screen_height - 40, anchor='nw', text=f'Score: {self.score}', fill='white', font=self.font)
+
         self.root.update()
 
     ########## GAME MOVEMENT ##########
@@ -100,11 +107,11 @@ class Game:
         print(self.next_shapes)
         if shape not in self.next_shapes:
             return
-        if self.grid.can_place(shape, x, y, check_placement=True):
+        if self.grid.can_place(shape.shape, x, y, check_placement=True):
             self.score += shape.get_part_size()
             self.grid.place_shape(shape.shape, x, y)
             self.score += self.grid.clear_lines()
-            self.next_shapes.pop(shape.get_shape_num())
+            self.next_shapes.pop(self.next_shapes.index(shape)) # todo we have a problem here
             self.placed_pieces += 1
             if self.placed_pieces == 3:
                 self.add_next_shapes()
@@ -176,6 +183,8 @@ class Game:
             self.next_shapes = node.action[3]
             self.draw()
             self.place_part_in_board_if_valid(node.action[0], node.action[1])
+            if self.sleep_between_actions:
+                time.sleep(2)
             if not self.headless: # todo: what is this?
                 self.root.after(1000, self.root.update_idletasks)
         if self.is_game_over():
@@ -306,7 +315,7 @@ def bfs_dfs_helper(data_type, game): # todo check
 
 
 if __name__ == '__main__':
-    initial_game = Game(False, 5, 50, False) # false- no UI, 5- board size, 50- cell size
+    initial_game = Game(False, 10, 50, False, True) # false- no UI, 5- board size, 50- cell size
     # initial_game.test()
     # initial_game.run() # run the game
     solution_path, grid = depth_first_search(initial_game)
