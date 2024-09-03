@@ -41,6 +41,8 @@ class ReflexAgent(Agent):
 
         # Choose one of the best actions
         scores = [self.evaluation_function(game_state, action_stat, action) for action_stat, action in legal_moves]
+        if len(scores) == 0:
+            return Action.STOP
         best_score = max(scores)
         best_indices = [index for index in range(len(scores)) if scores[index] == best_score]
         chosen_index = np.random.choice(best_indices)  # Pick randomly among the best
@@ -161,7 +163,7 @@ def better_evaluation_function(current_game_state):
 
 
 class Game_runner(object):
-    def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), display=None, sleep_between_actions=False):
+    def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), display=None, sleep_between_actions=True):
         super(Game_runner, self).__init__()
         self.sleep_between_actions = sleep_between_actions
         self.agent = agent
@@ -183,12 +185,12 @@ class Game_runner(object):
 
     def _game_loop(self):
         while not self._state.is_goal_state() and not self._should_quit:
-            if self.sleep_between_actions:
-                time.sleep(1)
+            # if self.sleep_between_actions:
+            #     time.sleep(2)
             # self.display.mainloop_iteration()
             action = self.agent.get_action(self._state)
-            # if action.is_goal_state() >= Action.STOP:
-            #     return
+            if action is None or action[0].is_goal_state():
+                return
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
             opponent_action = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct

@@ -528,6 +528,8 @@ class TimeoutFunction:
         return result
 
 class Node:
+    STOP = None # todo: change this to the stop action
+
     def __init__(self, action):
         """
         Initialize the Node with an action.

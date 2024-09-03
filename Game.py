@@ -102,6 +102,8 @@ class Game:
         # get coordinates and check if the placement of self.next_shapes[self.piece_num] is valid
         # if so, place the shape in the board and clear lines if needed and update the score
     def place_part_in_board_if_valid_by_shape(self, action):  # todo check
+        if action is None:
+            return
         x, y, piece_num, next_shapes = action[1].action
         shape =  next_shapes[piece_num]
         print(self.next_shapes)
