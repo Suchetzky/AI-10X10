@@ -87,7 +87,8 @@ class MultiAgentSearchAgent(Agent):
     """
 
     def __init__(self, evaluation_function='scoreEvaluationFunction', depth=2):
-        self.evaluation_function = util.lookup(evaluation_function, globals())
+        # self.evaluation_function = util.lookup(evaluation_function, globals())
+        self.evaluation_function = score_evaluation_function
         self.depth = depth
 
     @abc.abstractmethod
@@ -114,7 +115,34 @@ class MinmaxAgent(MultiAgentSearchAgent):
             Returns the successor game state after an agent takes an action
         """
         """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+        return self.minimax(game_state, self.depth, 0)
+
+    def minimax(self, game_state, depth, param, action=None):
+        if depth == 0:
+            return action, self.evaluation_function(game_state)
+        if param == 0:
+            return self.max_value(game_state, depth, param)[0]
+        else:
+            return self.min_value(game_state, depth, param)
+
+    def max_value(self, game_state, depth, param):
+        score = float('-inf')
+        max_action = None
+        for action in game_state.get_successors():
+            _, v = self.minimax(action[0], depth - 1, 1)
+            if v > score:
+                score = v
+                max_action = action
+        return max_action, score
+
+    def min_value(self, game_state, depth, param):
+        score = float('inf')
+        for game_state_, _ in game_state.get_successors():
+            _, v = self.minimax(game_state_, depth - 1, 0)
+            if v < score:
+                score = v
+        return None, score
 
 
 
@@ -205,7 +233,7 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 5, 50, False)
-    agent = ReflexAgent()
+    agent = MinmaxAgent()
     game_runner = Game_runner(agent, agent)
     game_runner.run(initial_game)
     # agent.get_action(initial_game)

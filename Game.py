@@ -105,7 +105,7 @@ class Game:
         if action is None:
             return
         x, y, piece_num, next_shapes = action[1].action
-        shape =  next_shapes[piece_num]
+        shape = next_shapes[piece_num]
         print(self.next_shapes)
         if shape not in self.next_shapes:
             return
@@ -185,8 +185,8 @@ class Game:
             self.next_shapes = node.action[3]
             self.draw()
             self.place_part_in_board_if_valid(node.action[0], node.action[1])
-            if self.sleep_between_actions:
-                time.sleep(2)
+            if self.sleep_between_actions: # brake between steps
+                time.sleep(1)
             if not self.headless: # todo: what is this?
                 self.root.after(1000, self.root.update_idletasks)
         if self.is_game_over():
