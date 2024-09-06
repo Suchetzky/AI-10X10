@@ -42,7 +42,7 @@ class ReflexAgent(Agent):
         # Choose one of the best actions
         scores = [self.evaluation_function(game_state, action_stat, action) for action_stat, action in legal_moves]
         if len(scores) == 0:
-            return Action.STOP, 0
+            return Action.STOP, self.evaluation_function(game_state, game_state, None)
         best_score = max(scores)
         best_indices = [index for index in range(len(scores)) if scores[index] == best_score]
         chosen_index = np.random.choice(best_indices)  # Pick randomly among the best
@@ -267,14 +267,14 @@ class Game_runner(object):
             # self.display.mainloop_iteration()
             action, score = self.agent.get_action(self._state)
             if action is None or action[0].is_goal_state():
-                return self._state.get_score()
+                return score
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
             self._state.draw()
         print("Game Over")
-        return self._state.get_score()
+        return score
 
 
 
