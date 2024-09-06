@@ -261,20 +261,23 @@ class Game_runner(object):
 
     def _game_loop(self):
         score = 0
+        actions = []
         while not self._state.is_goal_state() and not self._should_quit:
             # if self.sleep_between_actions:
             #     time.sleep(2)
             # self.display.mainloop_iteration()
             action, score = self.agent.get_action(self._state)
+            actions.append(action)
+            print(score)
             if action is None or action[0].is_goal_state():
-                return score
+                return score, actions
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
             self._state.draw()
         print("Game Over")
-        return score
+        return score, actions
 
 
 
@@ -283,7 +286,7 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
-    agent = ReflexAgent()
+    agent = MinmaxAgent()
     game_runner = Game_runner(agent, agent)
     print(game_runner.run(initial_game))
     # agent.get_action(initial_game)
