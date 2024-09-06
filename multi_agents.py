@@ -42,12 +42,12 @@ class ReflexAgent(Agent):
         # Choose one of the best actions
         scores = [self.evaluation_function(game_state, action_stat, action) for action_stat, action in legal_moves]
         if len(scores) == 0:
-            return Action.STOP
+            return Action.STOP, 0
         best_score = max(scores)
         best_indices = [index for index in range(len(scores)) if scores[index] == best_score]
         chosen_index = np.random.choice(best_indices)  # Pick randomly among the best
 
-        return legal_moves[chosen_index]
+        return legal_moves[chosen_index], best_score
 
     def evaluation_function(self, current_game_state, action_stat, action):
         """
@@ -122,7 +122,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
         if depth == 0:
             return action, self.evaluation_function(game_state)
         if param == 0:
-            return self.max_value(game_state, depth, param)[0]
+            return self.max_value(game_state, depth, param)
         else:
             return self.min_value(game_state, depth, param)
 
@@ -156,13 +156,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         """*** YOUR CODE HERE ***"""
-        return self.alphabeta(game_state, self.depth, -np.inf, np.inf)[0]
+        return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
 
     def alphabeta(self, game_state, depth, alpha, beta, max_player=True, action=None):
         if depth == 0:
             return Action.STOP, self.evaluation_function(game_state)
         if max_player:
-            return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))[0]
+            return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))
         else:
             return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
 
@@ -206,10 +206,25 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
+        return self.expectimax(game_state, self.depth, True)
 
+    def expectimax(self, game_state, depth, max_player_flag):
+        if depth == 0:
+            return Action.STOP, self.evaluation_function(game_state)
+        if max_player_flag:
+            return self.max_value(game_state, depth, not max_player_flag)
+        else:
+            return self.exp_value(game_state, depth, max_player_flag)
 
-
+    def max_value(self, game_state, depth, param):
+        score = float('-inf')
+        max_action = None
+        for action in game_state.get_successors():
+            _, v = self.expectimax(action[0], depth - 1, 1)
+            if v > score:
+                score = v
+                max_action = action
+        return max_action, score
 
 
 def better_evaluation_function(current_game_state):
@@ -245,20 +260,21 @@ class Game_runner(object):
         self.opponent_agent.stop_running()
 
     def _game_loop(self):
+        score = 0
         while not self._state.is_goal_state() and not self._should_quit:
             # if self.sleep_between_actions:
             #     time.sleep(2)
             # self.display.mainloop_iteration()
-            action = self.agent.get_action(self._state)
+            action, score = self.agent.get_action(self._state)
             if action is None or action[0].is_goal_state():
-                return self._state.score
+                return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
-            opponent_action = self.opponent_agent.get_action(self._state)
+            opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
             self._state.draw()
         print("Game Over")
-        return self._state.score
+        return self._state.get_score()
 
 
 
@@ -266,8 +282,8 @@ class Game_runner(object):
 better = better_evaluation_function
 
 if __name__ == '__main__':
-    initial_game = Game(False, 5, 50, False)
-    agent = MinmaxAgent()
+    initial_game = Game(False, 10, 50, False)
+    agent = ReflexAgent()
     game_runner = Game_runner(agent, agent)
     print(game_runner.run(initial_game))
     # agent.get_action(initial_game)
