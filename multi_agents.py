@@ -156,7 +156,40 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
+        return self.alphabeta(game_state, self.depth, -np.inf, np.inf)[0]
+
+    def alphabeta(self, game_state, depth, alpha, beta, max_player=True, action=None):
+        if depth == 0:
+            return Action.STOP, self.evaluation_function(game_state)
+        if max_player:
+            return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))[0]
+        else:
+            return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
+
+    def max_value(self, game_state, depth, max_player, alpha, beta):
+        score = float('-inf')
+        max_action = None
+        for action in game_state.get_successors():
+            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
+            if v > score:
+                score = v
+                max_action = action
+            alpha = max(alpha, score)
+            if alpha >= beta:
+                break
+        return max_action, score
+
+
+    def min_value(self, game_state, depth, max_player, alpha, beta):
+        score = float('inf')
+        for game_state_, _ in game_state.get_successors():
+            _, v = self.alphabeta(game_state_, depth - 1, alpha, beta, not max_player)
+            if v < score:
+                score = v
+            beta = min(beta, score)
+            if alpha >= beta:
+                break
+        return None, score
 
 
 
@@ -233,7 +266,7 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 5, 50, False)
-    agent = MinmaxAgent()
+    agent = AlphaBetaAgent()
     game_runner = Game_runner(agent, agent)
     game_runner.run(initial_game)
     # agent.get_action(initial_game)
