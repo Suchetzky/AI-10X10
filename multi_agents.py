@@ -251,12 +251,13 @@ class Game_runner(object):
             # self.display.mainloop_iteration()
             action = self.agent.get_action(self._state)
             if action is None or action[0].is_goal_state():
-                return
+                return self._state.score
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
             opponent_action = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
             self._state.draw()
+        print("Game Over")
         return self._state.score
 
 
@@ -266,7 +267,7 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 5, 50, False)
-    agent = AlphaBetaAgent()
+    agent = MinmaxAgent()
     game_runner = Game_runner(agent, agent)
-    game_runner.run(initial_game)
+    print(game_runner.run(initial_game))
     # agent.get_action(initial_game)

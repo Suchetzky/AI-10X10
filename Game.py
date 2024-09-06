@@ -53,10 +53,10 @@ class Game:
         self.grid.draw(self.canvas)
         if self.next_shapes:
             self.next_shapes[self.piece_num].draw(self.canvas, self.current_x, self.current_y, self.grid.size)
-            self.root.update()
+            # self.root.update()
             for i in range(len(self.next_shapes)):
-                self.next_shapes[i].draw(self.canvas, self.current_x + 11, self.current_y+(i*6), self.grid.size)
-                self.root.update()
+                self.next_shapes[i].draw(self.canvas, 11, (i*6), self.grid.size)
+                # self.root.update()
         self.canvas.create_text(self.board_len, screen_height - 40, anchor='nw', text=f'Score: {self.score}', fill='white', font=self.font)
 
         self.root.update()
@@ -106,7 +106,7 @@ class Game:
             return
         x, y, piece_num, next_shapes = action[1].action
         shape = next_shapes[piece_num]
-        print(self.next_shapes)
+        # print(self.next_shapes)
         if shape not in self.next_shapes:
             return
         if self.grid.can_place(shape.shape, x, y, check_placement=True):
@@ -319,8 +319,8 @@ def bfs_dfs_helper(data_type, game): # todo check
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False, True) # false- no UI, 5- board size, 50- cell size
     # initial_game.test()
-    # initial_game.run() # run the game
-    solution_path, grid = depth_first_search(initial_game)
+    initial_game.run() # run the game
+    # solution_path, grid = depth_first_search(initial_game)
     # print_path(grid)
-    print("Solution Path:", solution_path)
-    initial_game.run_from_code(solution_path) # run the game with the solution path
+    # print("Solution Path:", solution_path)
+    # initial_game.run_from_code(solution_path) # run the game with the solution path
