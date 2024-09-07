@@ -134,6 +134,8 @@ class MinmaxAgent(MultiAgentSearchAgent):
             if v > score:
                 score = v
                 max_action = action
+        if score == float('-inf'):
+            return Action.STOP, self.evaluation_function(game_state)
         return max_action, score
 
     def min_value(self, game_state, depth, param):
@@ -142,6 +144,8 @@ class MinmaxAgent(MultiAgentSearchAgent):
             _, v = self.minimax(game_state_, depth - 1, 0)
             if v < score:
                 score = v
+        if score == float('inf'):
+            return None, self.evaluation_function(game_state)
         return None, score
 
 
@@ -177,6 +181,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             alpha = max(alpha, score)
             if alpha >= beta:
                 break
+        if score == float('-inf'):
+            return Action.STOP, self.evaluation_function(game_state)
         return max_action, score
 
 
@@ -189,6 +195,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             beta = min(beta, score)
             if alpha >= beta:
                 break
+        if score == float('inf'):
+            return None, self.evaluation_function(game_state)
         return None, score
 
 
@@ -224,7 +232,12 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if v > score:
                 score = v
                 max_action = action
+        if score == float('-inf'):
+            return Action.STOP, self.evaluation_function(game_state)
         return max_action, score
+
+    def exp_value(self, game_state, depth, max_player_flag):
+        pass
 
 
 def better_evaluation_function(current_game_state):
@@ -268,16 +281,15 @@ class Game_runner(object):
             # self.display.mainloop_iteration()
             action, score = self.agent.get_action(self._state)
             actions.append(action)
-            print(score)
+            # print(score)
             if action is None or action[0].is_goal_state():
-                return score, actions
+                return score
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
             self._state.draw()
-        print("Game Over")
-        return score, actions
+        return score
 
 
 
@@ -288,5 +300,7 @@ if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
     agent = MinmaxAgent()
     game_runner = Game_runner(agent, agent)
-    print(game_runner.run(initial_game))
+    score = game_runner.run(initial_game)
+    print(score)
+    # initial_game.run_from_code(solution_path)
     # agent.get_action(initial_game)
