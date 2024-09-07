@@ -134,8 +134,6 @@ class MinmaxAgent(MultiAgentSearchAgent):
             if v > score:
                 score = v
                 max_action = action
-        if score == float('-inf'):
-            return Action.STOP, self.evaluation_function(game_state)
         return max_action, score
 
     def min_value(self, game_state, depth, param):
@@ -144,8 +142,6 @@ class MinmaxAgent(MultiAgentSearchAgent):
             _, v = self.minimax(game_state_, depth - 1, 0)
             if v < score:
                 score = v
-        if score == float('inf'):
-            return None, self.evaluation_function(game_state)
         return None, score
 
 
@@ -181,8 +177,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             alpha = max(alpha, score)
             if alpha >= beta:
                 break
-        if score == float('-inf'):
-            return Action.STOP, self.evaluation_function(game_state)
         return max_action, score
 
 
@@ -195,8 +189,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             beta = min(beta, score)
             if alpha >= beta:
                 break
-        if score == float('inf'):
-            return None, self.evaluation_function(game_state)
         return None, score
 
 
@@ -232,12 +224,18 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if v > score:
                 score = v
                 max_action = action
-        if score == float('-inf'):
-            return Action.STOP, self.evaluation_function(game_state)
         return max_action, score
 
     def exp_value(self, game_state, depth, max_player_flag):
-        pass
+        score = 0
+        actions = game_state.get_successors()
+        for action in actions:
+            _, v = self.expectimax(action[0], depth - 1, 0)
+            score += v
+        if len(actions) == 0:
+            return None, self.evaluation_function(game_state)
+        return None, score / len(actions)
+
 
 
 def better_evaluation_function(current_game_state):
@@ -252,7 +250,7 @@ def better_evaluation_function(current_game_state):
 
 
 class Game_runner(object):
-    def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), display=None, sleep_between_actions=True):
+    def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), display=None, sleep_between_actions=True, draw=True):
         super(Game_runner, self).__init__()
         self.sleep_between_actions = sleep_between_actions
         self.agent = agent
@@ -260,6 +258,7 @@ class Game_runner(object):
         self.opponent_agent = opponent_agent
         self._state = None
         self._should_quit = False
+        self.draw = draw
 
     def run(self, initial_state):
         self._should_quit = False
@@ -283,13 +282,14 @@ class Game_runner(object):
             actions.append(action)
             # print(score)
             if action is None or action[0].is_goal_state():
-                return score
+                return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
-            self._state.draw()
-        return score
+            if self.draw:
+                self._state.draw()
+        return self._state.get_score()
 
 
 
@@ -299,7 +299,7 @@ better = better_evaluation_function
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
     agent = MinmaxAgent()
-    game_runner = Game_runner(agent, agent)
+    game_runner = Game_runner(agent, agent, draw=True)
     score = game_runner.run(initial_game)
     print(score)
     # initial_game.run_from_code(solution_path)
