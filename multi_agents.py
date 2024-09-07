@@ -298,7 +298,7 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
-    agent = MinmaxAgent()
+    agent = ExpectimaxAgent()
     game_runner = Game_runner(agent, agent, draw=True)
     score = game_runner.run(initial_game)
     print(score)
