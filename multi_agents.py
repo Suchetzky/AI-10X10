@@ -3,6 +3,8 @@ import abc
 import util
 from Game import Game
 import abc
+
+from heuristics import Heuristics
 from util import Node as Action
 import time
 
@@ -68,7 +70,9 @@ def score_evaluation_function(current_game_state):
     This evaluation function is meant for use with adversarial search agents
     (not reflex agents).
     """
-    return current_game_state.score
+    # return current_game_state.score
+    h = Heuristics()
+    return h.heuristic(current_game_state.grid)
 
 
 class MultiAgentSearchAgent(Agent):
@@ -245,7 +249,9 @@ def better_evaluation_function(current_game_state):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return Heuristics.heuristic(current_game_state.grid)
+    # heuristics = Heuristics(current_game_state)
+
 
 
 
