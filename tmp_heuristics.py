@@ -68,15 +68,28 @@ class Heuristics:
                     smoothness -= abs(board.grid[i][j] - board.grid[i][j + 1])
         return smoothness
 
+    def calculate_monotonicity(self, board):
+        monotonicity = 0
+        for i in range(board.height):
+            row = board.grid[i]
+            if row == sorted(row) or row == sorted(row, reverse=True):
+                monotonicity += 1  # Row is monotonic
+            col = [board.grid[j][i] for j in range(board.height)]
+            if col == sorted(col) or col == sorted(col, reverse=True):
+                monotonicity += 1  # Column is monotonic
+        return monotonicity
+
     def heuristic(self, board):
         # add weights to the different heuristics
         # score_weight = 1
         holes_weight = -10
         empty_cells_weight = 10
         smoothness_weight = 10
+        monotonicity_weight = 10
         return (holes_weight * self.holes(board) +
                 empty_cells_weight * self.empty_cells(board) +
-                smoothness_weight * self.calculate_smoothness(board)
+                smoothness_weight * self.calculate_smoothness(board) +
+                monotonicity_weight * self.calculate_monotonicity(board)
                 )
         # bumpiness_cols_weight = random.randint(-10, 5)
         # bumpiness_rows_weight = random.randint(-10, 5)
