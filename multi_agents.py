@@ -71,8 +71,8 @@ def score_evaluation_function(current_game_state):
     (not reflex agents).
     """
     # return current_game_state.score
-    h = Heuristics()
-    return h.heuristic(current_game_state.grid) + current_game_state.get_score()
+    h = Heuristics(current_game_state.grid)
+    return h.heuristic() + current_game_state.get_score()
 
 
 class MultiAgentSearchAgent(Agent):
