@@ -6,6 +6,7 @@ from util import Stack, Queue
 from util import Node
 import util
 import time
+import tracemalloc
 
 # Set up display dimensions
 screen_width, screen_height = 900, 700
@@ -235,7 +236,7 @@ class Game:
         return successors
 
     def is_goal_state(self):
-        return self.score >= 10000
+        return self.score >= 100000
 
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
@@ -313,14 +314,68 @@ def bfs_dfs_helper(data_type, game): # todo check
 #         # print(node, "\n")
 
 
+### For data collection
+import tracemalloc
+import time
+import pandas as pd
 
+def track_memory_and_time_for_dfs(game_instance):
+    # Start tracing memory allocations
+    tracemalloc.start()
 
+    # Start the timer to track the time for depth_first_search
+    start_time = time.time()
+
+    # Run depth_first_search
+    solution_path, grid = depth_first_search(game_instance)
+
+    # Stop the timer
+    end_time = time.time()
+
+    # Stop memory tracing and get the statistics
+    current, peak = tracemalloc.get_traced_memory()
+
+    # Stop tracing memory allocations
+    tracemalloc.stop()
+
+    # Return the time taken and peak memory usage
+    return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
+
+def run_multiple_times(game_instance, x):
+    # List to store the results
+    results = []
+
+    for i in range(1, x + 1):
+        # Recreate the game instance each time (to reset the game state)
+        new_game_instance = game_instance.deepcopy()
+
+        # Track memory and time for the current run
+        time_taken, memory_used = track_memory_and_time_for_dfs(new_game_instance)
+
+        # Append the results (run number, time, memory)
+        results.append([time_taken, memory_used])
+
+    # Convert results to a DataFrame
+    df = pd.DataFrame(results, columns=["Time Taken (seconds)", "Memory Used (MB)"])
+
+    # Calculate the averages
+    avg_time = df["Time Taken (seconds)"].mean()
+    avg_memory = df["Memory Used (MB)"].mean()
+
+    # Return the averages
+    return avg_time, avg_memory
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False, True) # false- no UI, 5- board size, 50- cell size
     # initial_game.test()
-    initial_game.run() # run the game
-    # solution_path, grid = depth_first_search(initial_game)
+    #initial_game.run() # run the game
+    avg_time, avg_memory = run_multiple_times(initial_game, 1)
+
+    # Output the average time and memory used
+    print(f"Average Time Taken: {avg_time:.4f} seconds")
+    print(f"Average Memory Used: {avg_memory:.4f} MB")
+
+    solution_path, grid = track_memory_and_time_for_dfs(initial_game)
     # print_path(grid)
     # print("Solution Path:", solution_path)
-    # initial_game.run_from_code(solution_path) # run the game with the solution path
+    #initial_game.run_from_code(solution_path) # run the game with the solution path
