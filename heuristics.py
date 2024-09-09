@@ -12,6 +12,7 @@ class Heuristics:
         self.bumpiness_cols_weight = random.randint(-10, 0)
         self.bumpiness_rows_weight = random.randint(-10, 0)
         self.blocks_of_shapes_weight = random.randint(0, 15)
+        self.empty_cells_weight = random.randint(0, 10)
         # write the aggregation of the heuristics to the data.csv file
         with open('data.csv', 'a') as csvfile:
             # fieldnames = ['score', 'holes', 'bumpiness_cols', 'bumpiness_rows', 'results']
@@ -77,6 +78,15 @@ class Heuristics:
                     blocks += 1
         return blocks
 
+    def empty_cells(self, board):
+        # Calculate the number of empty cells in the board
+        empty_cells = 0
+        for row in range(board.height):
+            for col in range(board.width):
+                if board.grid[row][col] == 0:
+                    empty_cells += 1
+        return empty_cells
+
     def bumpiness_cols(self):
         # Calculate the bumpiness of the board
         bumpiness = 0
@@ -93,7 +103,9 @@ class Heuristics:
         return bumpiness
 
     def heuristic(self):
-        return (self.score_weight * self.score() +
+        return (
+                # self.score_weight * self.score() +
+                self.empty_cells_weight * self.empty_cells(self.board) +
                 self.holes_weight * self.holes() +
                 self.bumpiness_cols_weight * self.bumpiness_cols() +
                 self.bumpiness_rows_weight * self.bumpiness_rows() +

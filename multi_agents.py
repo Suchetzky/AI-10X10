@@ -72,7 +72,7 @@ def score_evaluation_function(current_game_state):
     """
     # return current_game_state.score
     h = Heuristics()
-    return h.heuristic(current_game_state.grid)
+    return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
 
 class MultiAgentSearchAgent(Agent):
