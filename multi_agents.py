@@ -4,7 +4,7 @@ import util
 from Game import Game
 import abc
 
-from tmp_heuristics import Heuristics
+from heuristics import Heuristics
 from util import Node as Action
 import time
 
@@ -72,7 +72,7 @@ def score_evaluation_function(current_game_state):
     """
     # return current_game_state.score
     h = Heuristics()
-    return h.heuristic(current_game_state.grid) + current_game_state.get_score()
+    return h.heuristic(current_game_state.grid)
 
 
 class MultiAgentSearchAgent(Agent):
