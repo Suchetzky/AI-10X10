@@ -4,19 +4,39 @@ import numpy as np
 
 
 class Heuristics:
-    holes_weight = -10
-    empty_cells_weight = 10
-    smoothness_weight = 7
-    monotonicity_weight = 0
-    merges_weight = 0
-    sum_close_coordinates_values_weight = 0
-    count_valid_moves_weight = 0
-    weights = [holes_weight, empty_cells_weight, smoothness_weight, monotonicity_weight, merges_weight, sum_close_coordinates_values_weight, count_valid_moves_weight]
-    @classmethod
-    def write_weights_to_csv(cls, weights, heuristic_value):
-        with open('data.csv', 'a') as csvfile:
-            csvfile.write(f"{weights[0]},{weights[1]},{weights[2]},{weights[3]},{heuristic_value}\n")
+    _instance = None
 
+    holes_weight = random.randint(-10, 10)
+    empty_cells_weight = random.randint(-10, 10)
+    smoothness_weight = random.randint(-10, 10)
+    monotonicity_weight = random.randint(-10, 10)
+    merges_weight = random.randint(-10, 10)
+    sum_close_coordinates_values_weight = random.randint(-10, 10)
+    count_valid_moves_weight = random.randint(-10, 10)
+    weights = [holes_weight, empty_cells_weight, smoothness_weight, monotonicity_weight, merges_weight, sum_close_coordinates_values_weight, count_valid_moves_weight]
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(Heuristics, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+    @classmethod
+    
+    def random_weights(cls):
+        cls.holes_weight = random.randint(-10, 10)
+        cls.empty_cells_weight = random.randint(-10, 10)
+        cls.smoothness_weight = random.randint(-10, 10)
+        cls.monotonicity_weight = random.randint(-10, 10)
+        cls.merges_weight = random.randint(-10, 10)
+        cls.sum_close_coordinates_values_weight = random.randint(-10, 10)
+        cls.count_valid_moves_weight = random.randint(-10, 10)
+        cls.weights = [cls.holes_weight, cls.empty_cells_weight, cls.smoothness_weight, cls.monotonicity_weight, cls.merges_weight, cls.sum_close_coordinates_values_weight, cls.count_valid_moves_weight]
+   
+    @classmethod
+    def write_weights_to_csv(cls, heuristic_value):
+        with open('data.csv', 'a') as csvfile:
+            for i in range(len(Heuristics.weights)):
+                csvfile.write(f"{Heuristics.weights[i]},")
+            csvfile.write(f"{heuristic_value}\n")
     @staticmethod
     def holes(board):
         # Calculate the number of holes in the board
@@ -25,12 +45,10 @@ class Heuristics:
             for row in range(board.height):
                 # If the cell is empty and the cells around are full
                 if (board.grid[row][col] == 0 and
-                        (row + 1 >= board.width or board.grid[row + 1][
-                            col] == 1) and
+                        (row + 1 >= board.width or board.grid[row + 1][col] == 1) and
                         (row - 1 <= 0 or board.grid[row - 1][col] == 1) and
                         (col - 1 <= 0 or board.grid[row][col - 1] == 1) and
-                        (col + 1 >= board.height or board.grid[row][
-                            col + 1] == 1)):
+                        (col + 1 >= board.height or board.grid[row][col + 1] == 1)):
                     holes += 1
         return holes
 

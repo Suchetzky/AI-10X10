@@ -1,7 +1,10 @@
 import tkinter as tk
 from tkinter import font as tkFont
+
+import Astar
 from Grid import Grid
 from Shape import Shape
+from heuristics import Heuristics
 from util import Stack, Queue
 from util import Node
 import util
@@ -236,7 +239,7 @@ class Game:
         return successors
 
     def is_goal_state(self):
-        return self.score >= 100000
+        return self.score >= 1000
 
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
@@ -327,9 +330,10 @@ def track_memory_and_time_for_dfs(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    solution_path, grid = depth_first_search(game_instance)
-
+    # solution_path, grid = depth_first_search(game_instance)
+    solution_path, score = Astar.a_star_search(game_instance, Heuristics.heuristic)
     # Stop the timer
+    Heuristics.write_weights_to_csv(score)
     end_time = time.time()
 
     # Stop memory tracing and get the statistics
@@ -374,8 +378,8 @@ if __name__ == '__main__':
     # Output the average time and memory used
     print(f"Average Time Taken: {avg_time:.4f} seconds")
     print(f"Average Memory Used: {avg_memory:.4f} MB")
-
-    solution_path, grid = track_memory_and_time_for_dfs(initial_game)
+    # Heuristics.random_weights()
+    # solution_path, grid = track_memory_and_time_for_dfs(initial_game)
     # print_path(grid)
     # print("Solution Path:", solution_path)
     #initial_game.run_from_code(solution_path) # run the game with the solution path
