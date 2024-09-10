@@ -1,5 +1,6 @@
 import random
 import csv
+import numpy as np
 
 
 class Heuristics:
@@ -36,98 +37,143 @@ class Heuristics:
     @staticmethod
     def bumpiness_cols(board):
         # Calculate the bumpiness of the board
-        bumpiness = 0
-        for col in range(board.width - 1):
-            bumpiness += abs(sum([board.grid[row][col] for row in
-                                  range(board.height)]) - sum(
-                [board.grid[row][col + 1] for row in range(board.height)]))
-        return bumpiness
+        # bumpiness = 0
+        # for col in range(board.width - 1):
+        #     bumpiness += abs(sum([board.grid[row][col] for row in
+        #                           range(board.height)]) - sum(
+        #         [board.grid[row][col + 1] for row in range(board.height)]))
+        # return bumpiness
+        col_sums = np.sum(board.grid, axis=0)
+        return np.sum(np.abs(np.diff(col_sums)))
 
     @staticmethod
     def bumpiness_rows(board):
         # Calculate rows bumpiness
-        bumpiness = 0
-        for row in range(board.height):
-            bumpiness += abs(sum(board.grid[row]) - sum(board.grid[row]))
-        return bumpiness
+        # bumpiness = 0
+        # for row in range(board.height):
+        #     bumpiness += abs(sum(board.grid[row]) - sum(board.grid[row]))
+        # return bumpiness
+        row_sums = np.sum(board.grid, axis=1)
+        return np.sum(np.abs(np.diff(row_sums)))
 
     @staticmethod
     def empty_cells(board):
         # Calculate the number of empty cells
-        empty_cells = 0
-        for row in range(board.height):
-            for col in range(board.width):
-                if board.grid[row][col] == 0:
-                    empty_cells += 1
-        return empty_cells
+        # empty_cells = 0
+        # for row in range(board.height):
+        #     for col in range(board.width):
+        #         if board.grid[row][col] == 0:
+        #             empty_cells += 1
+        # return empty_cells
+        return np.sum(board.grid == 0)
 
     @staticmethod
     def calculate_smoothness(board):
+        # smoothness = 0
+        # for i in range(board.height):
+        #     for j in range(board.height):
+        #         if i + 1 < board.height:  # Compare vertically
+        #             smoothness -= abs(board.grid[i][j] - board.grid[i + 1][j])
+        #         if j + 1 < len(board.grid[i]):  # Compare horizontally
+        #             smoothness -= abs(board.grid[i][j] - board.grid[i][j + 1])
+        # return smoothness
         smoothness = 0
-        for i in range(board.height):
-            for j in range(board.height):
-                if i + 1 < board.height:  # Compare vertically
-                    smoothness -= abs(board.grid[i][j] - board.grid[i + 1][j])
-                if j + 1 < len(board.grid[i]):  # Compare horizontally
-                    smoothness -= abs(board.grid[i][j] - board.grid[i][j + 1])
+        smoothness -= np.sum(
+            np.abs(np.diff(board.grid, axis=0)))  # Vertical smoothness
+        smoothness -= np.sum(
+            np.abs(np.diff(board.grid, axis=1)))  # Horizontal smoothness
         return smoothness
 
     @staticmethod
     def calculate_monotonicity(board):
-        monotonicity = 0
-        for i in range(board.height):
-            row = board.grid[i]
-            if row == sorted(row) or row == sorted(row, reverse=True):
-                monotonicity += 1  # Row is monotonic
-            col = [board.grid[j][i] for j in range(board.height)]
-            if col == sorted(col) or col == sorted(col, reverse=True):
-                monotonicity += 1  # Column is monotonic
-        return monotonicity
+        # monotonicity = 0
+        # for i in range(board.height):
+        #     row = board.grid[i]
+        #     if row == sorted(row) or row == sorted(row, reverse=True):
+        #         monotonicity += 1  # Row is monotonic
+        #     col = [board.grid[j][i] for j in range(board.height)]
+        #     if col == sorted(col) or col == sorted(col, reverse=True):
+        #         monotonicity += 1  # Column is monotonic
+        # return monotonicity
+        grid = np.array(board.grid)
+        # Vectorized smoothness calculation
+        smoothness = 0
+        smoothness -= np.sum(
+            np.abs(np.diff(grid, axis=0)))  # Vertical smoothness
+        smoothness -= np.sum(
+            np.abs(np.diff(grid, axis=1)))  # Horizontal smoothness
+        return smoothness
 
     @staticmethod
     def count_merge_opportunities(board):
+        # merges = 0
+        # for i in range(board.height):
+        #     for j in range(len(board.grid[i])):
+        #         if i + 1 < board.height and board.grid[i][j] == board.grid[i + 1][j]:
+        #             merges += 1
+        #         if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
+        #             merges += 1
+        # return merges
+        grid = np.array(board.grid)
         merges = 0
-        for i in range(board.height):
-            for j in range(len(board.grid[i])):
-                if i + 1 < board.height and board.grid[i][j] == board.grid[i + 1][j]:
-                    merges += 1
-                if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
-                    merges += 1
+        # Vectorized checking for adjacent merges (rows)
+        merges += np.sum(grid[:, :-1] == grid[:, 1:])
+        # Vectorized checking for adjacent merges (columns)
+        merges += np.sum(grid[:-1, :] == grid[1:, :])
         return merges
 
-    @staticmethod
-    def sum_close_coordinates_values(board):
-        sum = 0
-        for row in range(board.height):
-            for col in range(board.width):
-                if row + 1 < board.height:
-                    sum += board.grid[row + 1][col]
-                else:
-                    sum += 1
-                if row - 1 >= 0:
-                    sum += board.grid[row - 1][col]
-                else:
-                    sum += 1
-                if col + 1 < board.width:
-                    sum += board.grid[row][col + 1]
-                else:
-                    sum += 1
-                if col - 1 >= 0:
-                    sum += board.grid[row][col - 1]
-                else:
-                    sum += 1
-        return sum
+    # @staticmethod
+    # def sum_close_coordinates_values(board):
+    #     adjacent_sum = 0
+    #     for row in range(board.height):
+    #         for col in range(board.width):
+    #             if board.grid[row][col] != 0:
+    #                 # Check up, down, left, right
+    #                 if row > 0:
+    #                     adjacent_sum += board.grid[row - 1][col]
+    #                 if row < board.height - 1:
+    #                     adjacent_sum += board.grid[row + 1][col]
+    #                 if col > 0:
+    #                     adjacent_sum += board.grid[row][col - 1]
+    #                 if col < board.width - 1:
+    #                     adjacent_sum += board.grid[row][col + 1]
+    #     return adjacent_sum
+        # sum = 0
+        # for row in range(board.height):
+        #     for col in range(board.width):
+        #         if row + 1 < board.height:
+        #             sum += board.grid[row + 1][col]
+        #         else:
+        #             sum += 1
+        #         if row - 1 >= 0:
+        #             sum += board.grid[row - 1][col]
+        #         else:
+        #             sum += 1
+        #         if col + 1 < board.width:
+        #             sum += board.grid[row][col + 1]
+        #         else:
+        #             sum += 1
+        #         if col - 1 >= 0:
+        #             sum += board.grid[row][col - 1]
+        #         else:
+        #             sum += 1
+        # return sum
 
     @staticmethod
     def count_valid_moves(board):
+        grid = np.array(board.grid)
         valid_moves = 0
-        for i in range(len(board.grid)):
-            for j in range(len(board.grid[i])):
-                if i + 1 < len(board.grid) and board.grid[i][j] == board.grid[i + 1][j]:
-                    valid_moves += 1
-                if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
-                    valid_moves += 1
+        valid_moves += np.sum(grid[:, :-1] == grid[:, 1:])  # Horizontal
+        valid_moves += np.sum(grid[:-1, :] == grid[1:, :])  # Vertical
         return valid_moves
+        # valid_moves = 0
+        # for i in range(len(board.grid)):
+        #     for j in range(len(board.grid[i])):
+        #         if i + 1 < len(board.grid) and board.grid[i][j] == board.grid[i + 1][j]:
+        #             valid_moves += 1
+        #         if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
+        #             valid_moves += 1
+        # return valid_moves
 
     @staticmethod
     def heuristic(board):
@@ -137,7 +183,7 @@ class Heuristics:
                         Heuristics.smoothness_weight * Heuristics.calculate_smoothness(board) +
                         Heuristics.monotonicity_weight * Heuristics.calculate_monotonicity(board) +
                         Heuristics.merges_weight * Heuristics.count_merge_opportunities(board) +
-                        Heuristics.sum_close_coordinates_values_weight * Heuristics.sum_close_coordinates_values(board) +
+                        # Heuristics.sum_close_coordinates_values_weight * Heuristics.sum_close_coordinates_values(board) +
                         Heuristics.count_valid_moves_weight * Heuristics.count_valid_moves(board))
 
 # if __name__ == '__main__':
