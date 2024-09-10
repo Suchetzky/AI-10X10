@@ -6,11 +6,11 @@ import numpy as np
 class Heuristics:
     _instance = None
 
-    holes_weight = random.randint(-10, 10)
-    empty_cells_weight = random.randint(-10, 10)
-    smoothness_weight = random.randint(-10, 10)
-    monotonicity_weight = random.randint(-10, 10)
-    merges_weight = random.randint(-10, 10)
+    holes_weight = random.randint(-10, 0)
+    empty_cells_weight = random.randint(0, 10)
+    smoothness_weight = random.randint(0, 10)
+    monotonicity_weight = random.randint(0, 10)
+    merges_weight = random.randint(0, 10)
     sum_close_coordinates_values_weight = random.randint(-10, 10)
     count_valid_moves_weight = random.randint(-10, 10)
     weights = [holes_weight, empty_cells_weight, smoothness_weight, monotonicity_weight, merges_weight, sum_close_coordinates_values_weight, count_valid_moves_weight]
@@ -27,9 +27,9 @@ class Heuristics:
         cls.smoothness_weight = random.randint(-10, 10)
         cls.monotonicity_weight = random.randint(-10, 10)
         cls.merges_weight = random.randint(-10, 10)
-        cls.sum_close_coordinates_values_weight = random.randint(-10, 10)
-        cls.count_valid_moves_weight = random.randint(-10, 10)
-        cls.weights = [cls.holes_weight, cls.empty_cells_weight, cls.smoothness_weight, cls.monotonicity_weight, cls.merges_weight, cls.sum_close_coordinates_values_weight, cls.count_valid_moves_weight]
+        # cls.sum_close_coordinates_values_weight = random.randint(-10, 10)
+        cls.count_valid_moves_weight = random.randint(0, 10)
+        cls.weights = [cls.holes_weight, cls.empty_cells_weight, cls.smoothness_weight, cls.monotonicity_weight, cls.merges_weight, cls.count_valid_moves_weight]
    
     @classmethod
     def write_weights_to_csv(cls, heuristic_value):
