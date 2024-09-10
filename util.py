@@ -88,6 +88,16 @@ class PriorityQueue:
 
     def isEmpty(self):
         return len(self.heap) == 0
+    
+    def push_and_keep_n_largest(self, item, priority, n):
+        """
+        Pushes the item with the given priority into the priority queue.
+        Ensures that only the n largest items (by priority) are kept.
+        If more than n items are in the queue, the smallest one is removed.
+        """
+        self.push(item, priority)
+        if len(self.heap) > n:
+            heapq.heappop(self.heap)  # Removes the smallest (lowest priority) item
 
 
 class PriorityQueueWithFunction(PriorityQueue):

@@ -30,6 +30,6 @@ def a_star_search(problem, heuristic=None):
             for successor, action in state.get_successors():
                 new_actions = actions + [action]
                 new_cost = successor.score + heuristic(successor.grid)
-                fringe.push(PriorityQueueItem(successor, new_actions), new_cost)
+                fringe.push_and_keep_n_largest(PriorityQueueItem(successor, new_actions), new_cost, 1000)
     return [], 0
 
