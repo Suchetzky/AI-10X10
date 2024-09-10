@@ -1,12 +1,15 @@
+import tracemalloc
+
 import numpy as np
 import abc
 import util
-from Game import Game
+from Game import Game, run_multiple_times
 import abc
 
-from heuristics import Heuristics
+from tmp_heuristics import Heuristics
 from util import Node as Action
 import time
+import pandas as pd
 
 class Agent(object):
     def __init__(self):
@@ -72,7 +75,7 @@ def score_evaluation_function(current_game_state):
     """
     # return current_game_state.score
     h = Heuristics()
-    return h.heuristic(current_game_state.grid)
+    return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
 
 class MultiAgentSearchAgent(Agent):
@@ -298,15 +301,70 @@ class Game_runner(object):
         return self._state.get_score()
 
 
+def run_multiple_times(game_instance, x):
+    # List to store the results
+    results = []
+
+    for i in range(1, x + 1):
+        # Recreate the game instance each time (to reset the game state)
+        new_game_instance = game_instance.deepcopy()
+
+        # Track memory and time for the current run
+        time_taken, memory_used = track_memory_and_time_for_agent(new_game_instance)
+
+        # Append the results (run number, time, memory)
+        results.append([time_taken, memory_used])
+
+    # Convert results to a DataFrame
+    df = pd.DataFrame(results, columns=["Time Taken (seconds)", "Memory Used (MB)"])
+
+    # Calculate the averages
+    avg_time = df["Time Taken (seconds)"].mean()
+    avg_memory = df["Memory Used (MB)"].mean()
+
+    # Return the averages
+    return avg_time, avg_memory
+
+
+def track_memory_and_time_for_agent(game_instance):
+    # Start tracing memory allocations
+    tracemalloc.start()
+
+    # Start the timer to track the time for depth_first_search
+    start_time = time.time()
+
+    # Run depth_first_search
+    agent = ExpectimaxAgent()
+    game_runner = Game_runner(agent, agent, draw=True)
+    score = game_runner.run(initial_game)
+    print(score)
+    # Stop the timer
+    end_time = time.time()
+
+    # Stop memory tracing and get the statistics
+    current, peak = tracemalloc.get_traced_memory()
+
+    # Stop tracing memory allocations
+    tracemalloc.stop()
+
+    # Return the time taken and peak memory usage
+    return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
+
 
 # Abbreviation
 better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
-    agent = ExpectimaxAgent()
-    game_runner = Game_runner(agent, agent, draw=True)
-    score = game_runner.run(initial_game)
-    print(score)
+    # agent = ExpectimaxAgent()
+    # game_runner = Game_runner(agent, agent, draw=True)
+    avg_time, avg_memory = run_multiple_times(initial_game, 1)
+
+    # Output the average time and memory used
+    print(f"Average Time Taken: {avg_time:.4f} seconds")
+    print(f"Average Memory Used: {avg_memory:.4f} MB")
+    # score = game_runner.run(initial_game)
+    # print(score)
+    track_memory_and_time_for_agent(initial_game)
     # initial_game.run_from_code(solution_path)
     # agent.get_action(initial_game)

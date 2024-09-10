@@ -126,9 +126,9 @@ class Heuristics:
         # score_weight = 1
         holes_weight = -10
         empty_cells_weight = 10
-        smoothness_weight = 7
+        smoothness_weight = 15
         monotonicity_weight = 0
-        merges_weight = 0
+        merges_weight = 5
         sum_close_coordinates_values_weight = 0
         count_valid_moves_weight = 0
         return (holes_weight * self.holes(board) +
