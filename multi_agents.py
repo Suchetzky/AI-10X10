@@ -293,6 +293,8 @@ class Game_runner(object):
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
+            if self.draw:
+                self._state.draw()
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
