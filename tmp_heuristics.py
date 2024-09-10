@@ -79,17 +79,65 @@ class Heuristics:
                 monotonicity += 1  # Column is monotonic
         return monotonicity
 
+    def count_merge_opportunities(self, board):
+        merges = 0
+        for i in range(board.height):
+            for j in range(len(board.grid[i])):
+                if i + 1 < board.height and board.grid[i][j] == board.grid[i + 1][j]:
+                    merges += 1
+                if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
+                    merges += 1
+        return merges
+
+    def sum_close_coordinates_values(self, board):
+        sum = 0
+        for row in range(board.height):
+            for col in range(board.width):
+                if row + 1 < board.height:
+                    sum += board.grid[row + 1][col]
+                else:
+                    sum += 1
+                if row - 1 >= 0:
+                    sum += board.grid[row - 1][col]
+                else:
+                    sum += 1
+                if col + 1 < board.width:
+                    sum += board.grid[row][col + 1]
+                else:
+                    sum += 1
+                if col - 1 >= 0:
+                    sum += board.grid[row][col - 1]
+                else:
+                    sum += 1
+        return sum
+
+    def count_valid_moves(self, board):
+        valid_moves = 0
+        for i in range(len(board.grid)):
+            for j in range(len(board.grid[i])):
+                if i + 1 < len(board.grid) and board.grid[i][j] == board.grid[i + 1][j]:
+                    valid_moves += 1
+                if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
+                    valid_moves += 1
+        return valid_moves
+
     def heuristic(self, board):
         # add weights to the different heuristics
         # score_weight = 1
         holes_weight = -10
         empty_cells_weight = 10
-        smoothness_weight = 10
-        monotonicity_weight = 10
+        smoothness_weight = 7
+        monotonicity_weight = 0
+        merges_weight = 0
+        sum_close_coordinates_values_weight = 0
+        count_valid_moves_weight = 0
         return (holes_weight * self.holes(board) +
                 empty_cells_weight * self.empty_cells(board) +
                 smoothness_weight * self.calculate_smoothness(board) +
-                monotonicity_weight * self.calculate_monotonicity(board)
+                monotonicity_weight * self.calculate_monotonicity(board) +
+                merges_weight * self.count_merge_opportunities(board) +
+                sum_close_coordinates_values_weight * self.sum_close_coordinates_values(board) +
+                count_valid_moves_weight * self.count_valid_moves(board)
                 )
         # bumpiness_cols_weight = random.randint(-10, 5)
         # bumpiness_rows_weight = random.randint(-10, 5)
