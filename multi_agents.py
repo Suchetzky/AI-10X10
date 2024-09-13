@@ -278,7 +278,7 @@ class Game_runner(object):
     def _game_loop(self):
         while not self._state.is_goal_state():
             action, score = self.agent.get_action(self._state)
-            print(self._state.get_score())
+            # print(self._state.get_score())
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
@@ -327,7 +327,7 @@ def track_memory_and_time_for_agent(game_instance):
     # Run depth_first_search
     agent = ExpectimaxAgent(depth=1)
     game_runner = Game_runner(agent, agent, draw=True)
-    score = game_runner.run(initial_game)
+    score = game_runner.run(game_instance)
     print(score)
     # Stop the timer
     end_time = time.time()
@@ -347,15 +347,15 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
-    agent = ExpectimaxAgent(depth=1)
-    game_runner = Game_runner(agent, agent, draw=True)
-    # avg_time, avg_memory = run_multiple_times(initial_game, 1)
+    # agent = ExpectimaxAgent(depth=1)
+    # game_runner = Game_runner(agent, agent, draw=True)
+    avg_time, avg_memory = run_multiple_times(initial_game, 5)
 
     # Output the average time and memory used
-    # print(f"Average Time Taken: {avg_time:.4f} seconds")
-    # print(f"Average Memory Used: {avg_memory:.4f} MB")
-    score = game_runner.run(initial_game)
-    print(score)
+    print(f"Average Time Taken: {avg_time:.4f} seconds")
+    print(f"Average Memory Used: {avg_memory:.4f} MB")
+    # score = game_runner.run(initial_game)
+    # print(score)
     # track_memory_and_time_for_agent(initial_game)
     # initial_game.run_from_code(solution_path)
     # agent.get_action(initial_game)

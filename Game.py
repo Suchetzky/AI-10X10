@@ -239,7 +239,7 @@ class Game:
         return successors
 
     def is_goal_state(self):
-        return self.score >= 1000
+        return self.score >= 100
 
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
@@ -330,10 +330,10 @@ def track_memory_and_time_for_dfs(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    # solution_path, grid = depth_first_search(game_instance)
-    solution_path, score = Astar.a_star_search(game_instance, Heuristics.heuristic)
+    solution_path, grid = depth_first_search(game_instance)
+    # solution_path, score = Astar.a_star_search(game_instance, Heuristics.heuristic)
     # Stop the timer
-    Heuristics.write_weights_to_csv(score)
+    # Heuristics.write_weights_to_csv(score)
     end_time = time.time()
 
     # Stop memory tracing and get the statistics
@@ -373,7 +373,7 @@ if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False, True) # false- no UI, 5- board size, 50- cell size
     # initial_game.test()
     #initial_game.run() # run the game
-    avg_time, avg_memory = run_multiple_times(initial_game, 1)
+    avg_time, avg_memory = run_multiple_times(initial_game, 100)
 
     # Output the average time and memory used
     print(f"Average Time Taken: {avg_time:.4f} seconds")
