@@ -5,31 +5,45 @@ import numpy as np
 
 class Heuristics:
     _instance = None
+    holes_weight = -10
+    empty_cells_weight = 10
+    smoothness_weight = 10
+    monotonicity_weight = 10
+    merges_weight = 0
+    sum_close_coordinates_values_weight = 0
+    count_valid_moves_weight = 0
 
-    holes_weight = random.randint(-10, 0)
-    empty_cells_weight = random.randint(0, 10)
-    smoothness_weight = random.randint(0, 10)
-    monotonicity_weight = random.randint(0, 10)
-    merges_weight = random.randint(0, 10)
-    sum_close_coordinates_values_weight = random.randint(-10, 10)
-    count_valid_moves_weight = random.randint(-10, 10)
-    weights = [holes_weight, empty_cells_weight, smoothness_weight, monotonicity_weight, merges_weight, sum_close_coordinates_values_weight, count_valid_moves_weight]
+    # holes_weight = random.randint(-10, 0)
+    # empty_cells_weight = random.randint(0, 10)
+    # smoothness_weight = random.randint(0, 10)
+    # monotonicity_weight = random.randint(0, 10)
+    # merges_weight = random.randint(0, 10)
+    # sum_close_coordinates_values_weight = random.randint(-10, 10)
+    # count_valid_moves_weight = random.randint(-10, 10)
+    weights = [holes_weight,
+               empty_cells_weight,
+               smoothness_weight,
+               monotonicity_weight,
+               merges_weight,
+               sum_close_coordinates_values_weight,
+               count_valid_moves_weight
+               ]
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(Heuristics, cls).__new__(cls, *args, **kwargs)
         return cls._instance
-    @classmethod
-    
-    def random_weights(cls):
-        cls.holes_weight = random.randint(-10, 10)
-        cls.empty_cells_weight = random.randint(-10, 10)
-        cls.smoothness_weight = random.randint(-10, 10)
-        cls.monotonicity_weight = random.randint(-10, 10)
-        cls.merges_weight = random.randint(-10, 10)
-        # cls.sum_close_coordinates_values_weight = random.randint(-10, 10)
-        cls.count_valid_moves_weight = random.randint(0, 10)
-        cls.weights = [cls.holes_weight, cls.empty_cells_weight, cls.smoothness_weight, cls.monotonicity_weight, cls.merges_weight, cls.count_valid_moves_weight]
+    # @classmethod
+    #
+    # def random_weights(cls):
+    #     cls.holes_weight = random.randint(-10, 10)
+    #     cls.empty_cells_weight = random.randint(-10, 10)
+    #     cls.smoothness_weight = random.randint(-10, 10)
+    #     cls.monotonicity_weight = random.randint(-10, 10)
+    #     cls.merges_weight = random.randint(-10, 10)
+    #     # cls.sum_close_coordinates_values_weight = random.randint(-10, 10)
+    #     cls.count_valid_moves_weight = random.randint(0, 10)
+    #     cls.weights = [cls.holes_weight, cls.empty_cells_weight, cls.smoothness_weight, cls.monotonicity_weight, cls.merges_weight, cls.count_valid_moves_weight]
    
     @classmethod
     def write_weights_to_csv(cls, heuristic_value):
@@ -45,10 +59,12 @@ class Heuristics:
             for row in range(board.height):
                 # If the cell is empty and the cells around are full
                 if (board.grid[row][col] == 0 and
-                        (row + 1 >= board.width or board.grid[row + 1][col] == 1) and
+                        (row + 1 >= board.width or board.grid[row + 1][
+                            col] == 1) and
                         (row - 1 <= 0 or board.grid[row - 1][col] == 1) and
                         (col - 1 <= 0 or board.grid[row][col - 1] == 1) and
-                        (col + 1 >= board.height or board.grid[row][col + 1] == 1)):
+                        (col + 1 >= board.height or board.grid[row][
+                            col + 1] == 1)):
                     holes += 1
         return holes
 
@@ -83,7 +99,8 @@ class Heuristics:
         #         if board.grid[row][col] == 0:
         #             empty_cells += 1
         # return empty_cells
-        return np.sum(board.grid == 0)
+        grid = np.array(board.grid)
+        return np.sum(grid == 0)
 
     @staticmethod
     def calculate_smoothness(board):
@@ -114,13 +131,15 @@ class Heuristics:
         #         monotonicity += 1  # Column is monotonic
         # return monotonicity
         grid = np.array(board.grid)
-        # Vectorized smoothness calculation
-        smoothness = 0
-        smoothness -= np.sum(
-            np.abs(np.diff(grid, axis=0)))  # Vertical smoothness
-        smoothness -= np.sum(
-            np.abs(np.diff(grid, axis=1)))  # Horizontal smoothness
-        return smoothness
+        monotonicity = 0
+        for row in grid:
+            if np.all(np.diff(row) >= 0) or np.all(np.diff(row) <= 0):
+                monotonicity += 1
+        for col in grid.T:  # Transpose for columns
+            if np.all(np.diff(col) >= 0) or np.all(np.diff(col) <= 0):
+                monotonicity += 1
+        return monotonicity
+
 
     @staticmethod
     def count_merge_opportunities(board):
