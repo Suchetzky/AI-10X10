@@ -75,7 +75,7 @@ def score_evaluation_function(current_game_state):
     """
     # return current_game_state.score
     # h = Heuristics()
-    return current_game_state.get_score()
+    return 0
     # return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
 
@@ -220,29 +220,29 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         if depth == 0:
             return Action.STOP, self.evaluation_function(game_state)
         if max_player_flag:
-            return self.max_value(game_state, depth, not max_player_flag)
+            score = float('-inf')
+            max_action = None
+            for action in game_state.get_successors():
+                _, v = self.expectimax(action[0], depth, not max_player_flag)
+                if v > score:
+                    score = v
+                    max_action = action
+            return max_action, score
         else:
-            return self.exp_value(game_state, depth, max_player_flag)
+            score = 0
+            actions = game_state.get_successors()
+            for action in actions:
+                _, v = self.expectimax(action[0], depth - 1, not max_player_flag)
+                score += v
+            if len(actions) == 0:
+                return None, self.evaluation_function(game_state)
+            return None, score / len(actions)
 
-    def max_value(self, game_state, depth, param):
-        score = float('-inf')
-        max_action = None
-        for action in game_state.get_successors():
-            _, v = self.expectimax(action[0], depth, 1)
-            if v > score:
-                score = v
-                max_action = action
-        return max_action, score
+    # def max_value(self, game_state, depth, param):
 
-    def exp_value(self, game_state, depth, max_player_flag):
-        score = 0
-        actions = game_state.get_successors()
-        for action in actions:
-            _, v = self.expectimax(action[0], depth - 1, 0)
-            score += v
-        if len(actions) == 0:
-            return None, self.evaluation_function(game_state)
-        return None, score / len(actions)
+
+    # def exp_value(self, game_state, depth, max_player_flag):
+
 
 
 
@@ -325,7 +325,7 @@ def track_memory_and_time_for_agent(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    agent = ExpectimaxAgent()
+    agent = ExpectimaxAgent(depth=1)
     game_runner = Game_runner(agent, agent, draw=True)
     score = game_runner.run(initial_game)
     print(score)
@@ -347,7 +347,7 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
-    agent = ExpectimaxAgent()
+    agent = ExpectimaxAgent(depth=1)
     game_runner = Game_runner(agent, agent, draw=True)
     # avg_time, avg_memory = run_multiple_times(initial_game, 1)
 
