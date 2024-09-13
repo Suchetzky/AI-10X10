@@ -74,8 +74,9 @@ def score_evaluation_function(current_game_state):
     (not reflex agents).
     """
     # return current_game_state.score
-    h = Heuristics()
-    return h.heuristic(current_game_state.grid) + current_game_state.get_score()
+    # h = Heuristics()
+    return current_game_state.get_score()
+    # return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
 
 class MultiAgentSearchAgent(Agent):
@@ -227,7 +228,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
-            _, v = self.expectimax(action[0], depth - 1, 1)
+            _, v = self.expectimax(action[0], depth, 1)
             if v > score:
                 score = v
                 max_action = action
@@ -270,36 +271,24 @@ class Game_runner(object):
         self.draw = draw
 
     def run(self, initial_state):
-        self._should_quit = False
         self._state = initial_state
         # self.display.initialize(initial_state)
         return self._game_loop()
 
-    def quit(self):
-        self._should_quit = True
-        self.agent.stop_running()
-        self.opponent_agent.stop_running()
-
     def _game_loop(self):
-        score = 0
-        actions = []
-        while not self._state.is_goal_state() and not self._should_quit:
-            # if self.sleep_between_actions:
-            #     time.sleep(2)
-            # self.display.mainloop_iteration()
+        while not self._state.is_goal_state():
             action, score = self.agent.get_action(self._state)
-            actions.append(action)
-            # print(score)
+            print(self._state.get_score())
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
-            if self.draw:
-                self._state.draw()
+            # if self.draw:
+            #     self._state.draw()
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
-            if self.draw:
-                self._state.draw()
+            # if self.draw:
+            #     self._state.draw()
         return self._state.get_score()
 
 
@@ -358,15 +347,15 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
-    # agent = ExpectimaxAgent()
-    # game_runner = Game_runner(agent, agent, draw=True)
-    avg_time, avg_memory = run_multiple_times(initial_game, 1)
+    agent = ExpectimaxAgent()
+    game_runner = Game_runner(agent, agent, draw=True)
+    # avg_time, avg_memory = run_multiple_times(initial_game, 1)
 
     # Output the average time and memory used
-    print(f"Average Time Taken: {avg_time:.4f} seconds")
-    print(f"Average Memory Used: {avg_memory:.4f} MB")
-    # score = game_runner.run(initial_game)
-    # print(score)
-    track_memory_and_time_for_agent(initial_game)
+    # print(f"Average Time Taken: {avg_time:.4f} seconds")
+    # print(f"Average Memory Used: {avg_memory:.4f} MB")
+    score = game_runner.run(initial_game)
+    print(score)
+    # track_memory_and_time_for_agent(initial_game)
     # initial_game.run_from_code(solution_path)
     # agent.get_action(initial_game)
