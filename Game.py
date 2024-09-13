@@ -273,8 +273,9 @@ class Game:
         # successor = self.deepcopy()
         # successor.place_part_in_board_if_valid(action[0], action[1])
         # return successor
-
-
+    
+    def __lt__(self, other):
+        return self.get_score() < other.get_score()
 
     #############################
 
@@ -289,6 +290,27 @@ def depth_first_search(problem):
 def breadth_first_search(problem):
     queue = Queue()
     return bfs_dfs_helper(queue, problem)
+
+def a_star_search(problem, heuristic=None):
+    return a_star_helper(util.PriorityQueue(), problem, heuristic)
+
+def a_star_helper(data_type, game, heuristic): # todo check
+    data_type.push((game, []), 0)
+    visited = set()
+
+    while not data_type.isEmpty():
+        state, path= data_type.pop()
+
+        if state.is_goal_state():
+            return path
+        
+        if state not in visited:
+            visited.add(state)
+            for successor, actionNode in state.get_successors():
+                if successor not in visited:
+                    new_path = path + [actionNode]
+                    data_type.push((successor, new_path), -successor.get_score())
+    return []
 
 def bfs_dfs_helper(data_type, game): # todo check
     data_type.push((game, [], []))
@@ -331,7 +353,7 @@ def track_memory_and_time_for_dfs(game_instance):
 
     # Run depth_first_search
     solution_path, grid = depth_first_search(game_instance)
-    # solution_path, score = Astar.a_star_search(game_instance, Heuristics.heuristic)
+    # solution_path = a_star_search(game_instance)
     # Stop the timer
     # Heuristics.write_weights_to_csv(score)
     end_time = time.time()
@@ -373,8 +395,9 @@ if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False, True) # false- no UI, 5- board size, 50- cell size
     # initial_game.test()
     #initial_game.run() # run the game
-    avg_time, avg_memory = run_multiple_times(initial_game, 100)
-
+    avg_time, avg_memory = run_multiple_times(initial_game, 10)
+    #solution_path, score = a_star_search(initial_game)
+    #print(score)
     # Output the average time and memory used
     print(f"Average Time Taken: {avg_time:.4f} seconds")
     print(f"Average Memory Used: {avg_memory:.4f} MB")
