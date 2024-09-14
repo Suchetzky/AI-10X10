@@ -74,9 +74,9 @@ def score_evaluation_function(current_game_state):
     (not reflex agents).
     """
     # return current_game_state.score
-    # h = Heuristics()
-    return 0
-    # return h.heuristic(current_game_state.grid) + current_game_state.get_score()
+    h = Heuristics()
+    # return 0
+    return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
 
 class MultiAgentSearchAgent(Agent):
@@ -191,7 +191,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def min_value(self, game_state, depth, max_player, alpha, beta):
         score = float('inf')
         for game_state_, _ in game_state.get_successors():
-            _, v = self.alphabeta(game_state_, depth - 1, alpha, beta, not max_player)
+            _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
             if v < score:
                 score = v
             beta = min(beta, score)
@@ -272,20 +272,16 @@ class Game_runner(object):
 
     def run(self, initial_state):
         self._state = initial_state
-        # self.display.initialize(initial_state)
-        return self._game_loop()
-
-    def _game_loop(self):
         while not self._state.is_goal_state():
             action, score = self.agent.get_action(self._state)
             # print(self._state.get_score())
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
-            # if self.draw:
-            #     self._state.draw()
-            opponent_action, _ = self.opponent_agent.get_action(self._state)
-            self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
+            if self.draw:
+                self._state.draw()
+            # opponent_action, _ = self.opponent_agent.get_action(self._state)
+            # self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
             # if self.draw:
             #     self._state.draw()
@@ -301,20 +297,21 @@ def run_multiple_times(game_instance, x):
         new_game_instance = game_instance.deepcopy()
 
         # Track memory and time for the current run
-        time_taken, memory_used = track_memory_and_time_for_agent(new_game_instance)
+        time_taken, memory_used, score = track_memory_and_time_for_agent(new_game_instance)
 
         # Append the results (run number, time, memory)
-        results.append([time_taken, memory_used])
+        results.append([time_taken, memory_used, score])
 
     # Convert results to a DataFrame
-    df = pd.DataFrame(results, columns=["Time Taken (seconds)", "Memory Used (MB)"])
+    df = pd.DataFrame(results, columns=["Time Taken (seconds)", "Memory Used (MB)", "Score"])
 
     # Calculate the averages
     avg_time = df["Time Taken (seconds)"].mean()
     avg_memory = df["Memory Used (MB)"].mean()
+    avg_score = df["Score"].mean()
 
     # Return the averages
-    return avg_time, avg_memory
+    return avg_time, avg_memory, avg_score
 
 
 def track_memory_and_time_for_agent(game_instance):
@@ -325,10 +322,10 @@ def track_memory_and_time_for_agent(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    agent = ExpectimaxAgent(depth=1)
+    agent = AlphaBetaAgent(depth=1)
     game_runner = Game_runner(agent, agent, draw=True)
     score = game_runner.run(game_instance)
-    print(score)
+    # print(score)
     # Stop the timer
     end_time = time.time()
 
@@ -339,7 +336,7 @@ def track_memory_and_time_for_agent(game_instance):
     tracemalloc.stop()
 
     # Return the time taken and peak memory usage
-    return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
+    return end_time - start_time, peak / 1024 / 1024, score  # time in seconds, memory in MB
 
 
 # Abbreviation
@@ -347,13 +344,12 @@ better = better_evaluation_function
 
 if __name__ == '__main__':
     initial_game = Game(False, 10, 50, False)
-    # agent = ExpectimaxAgent(depth=1)
+    # agent = AlphaBetaAgent(depth=1)
     # game_runner = Game_runner(agent, agent, draw=True)
-    avg_time, avg_memory = run_multiple_times(initial_game, 5)
-
-    # Output the average time and memory used
+    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 5)
     print(f"Average Time Taken: {avg_time:.4f} seconds")
     print(f"Average Memory Used: {avg_memory:.4f} MB")
+    print(f"Average Score: {avg_score:.4f}")
     # score = game_runner.run(initial_game)
     # print(score)
     # track_memory_and_time_for_agent(initial_game)
