@@ -479,37 +479,37 @@ if __name__ == '__main__':
     # Get the best weights found by Optuna
     # print("Best weights:", study.best_params)
 
-    # initial_game = Game(False, 10, 50, False)
-    # # agent = AlphaBetaAgent(depth=1)
-    # # game_runner = Game_runner(agent, agent, draw=True)
-    # avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 10)
-    # print(f"Average Time Taken: {avg_time:.4f} seconds")
-    # print(f"Average Memory Used: {avg_memory:.4f} MB")
+    initial_game = Game(False, 10, 50, False)
+    # agent = AlphaBetaAgent(depth=1)
+    # game_runner = Game_runner(agent, agent, draw=True)
+    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 10)
+    print(f"Average Time Taken: {avg_time:.4f} seconds")
+    print(f"Average Memory Used: {avg_memory:.4f} MB")
     # print(f"Average Score: {avg_score:.4f}")
     # score = game_runner.run(initial_game)
     # print(score)
     # track_memory_and_time_for_agent(initial_game)
     # initial_game.run_from_code(solution_path)
     # agent.get_action(initial_game)
-    for i in range(1):
-        weights = {
-                'count_valid_moves_weight': random.randint( 0, 30),
-                'holes_weight': random.randint(-30, 0),
-                'empty_cells_weight': random.randint( 0, 30),
-                'smoothness_weight': random.randint( 0, 30),
-                'monotonicity_weight': random.randint( 0, 30),
-                'merges_weight': random.randint( 0, 30),
-                'bumpiness_weight': random.randint( 0, 30),
-                'corner_weight': random.randint( 0, 30),
-                'edge_weight': random.randint( 0, 30),
-                'heur1_weight': random.randint( 0, 30),
-                'heur2_weight': random.randint( 0, 30)
-
-            }
-        print(weights)
+    # for i in range(1):
+    #     weights = {
+    #             'count_valid_moves_weight': random.randint( 0, 30),
+    #             'holes_weight': random.randint(-30, 0),
+    #             'empty_cells_weight': random.randint( 0, 30),
+    #             'smoothness_weight': random.randint( 0, 30),
+    #             'monotonicity_weight': random.randint( 0, 30),
+    #             'merges_weight': random.randint( 0, 30),
+    #             'bumpiness_weight': random.randint( 0, 30),
+    #             'corner_weight': random.randint( 0, 30),
+    #             'edge_weight': random.randint( 0, 30),
+    #             'heur1_weight': random.randint( 0, 30),
+    #             'heur2_weight': random.randint( 0, 30)
+    #
+    #         }
+    #     print(weights)
 
         # Create a new game runner
-        agent = AlphaBetaAgent(evaluation_function=evaluation_function1, weights=weights)
+        agent = AlphaBetaAgent(depth=1)
         runner = Game_runner(agent=agent)
     #
         # Run the game and return the score (or some other performance metric)
