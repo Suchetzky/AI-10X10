@@ -239,7 +239,7 @@ class Game:
         return successors
 
     def is_goal_state(self):
-        return self.score >= 100
+        return self.score >= 100000
 
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
@@ -291,7 +291,26 @@ def breadth_first_search(problem):
     queue = Queue()
     return bfs_dfs_helper(queue, problem)
 
+def a_star_search(problem, heuristic=None):
+    return a_star_helper(util.PriorityQueue(), problem, heuristic)
 
+def a_star_helper(data_type, game, heuristic): # todo check
+    data_type.push((game, []), 0)
+    visited = set()
+
+    while not data_type.isEmpty():
+        state, path= data_type.pop()
+
+        if state.is_goal_state():
+            return path
+        
+        if state not in visited:
+            visited.add(state)
+            for successor, actionNode in state.get_successors():
+                if successor not in visited:
+                    new_path = path + [actionNode]
+                    data_type.push((successor, new_path), -successor.get_score())
+    return []
 
 def bfs_dfs_helper(data_type, game): # todo check
     data_type.push((game, [], []))
@@ -334,7 +353,7 @@ def track_memory_and_time_for_dfs(game_instance):
 
     # Run depth_first_search
     solution_path, grid = depth_first_search(game_instance)
-    solution_path = Astar.a_star_search(game_instance, Heuristics.heuristic)
+    # solution_path = a_star_search(game_instance)
     # Stop the timer
     # Heuristics.write_weights_to_csv(score)
     end_time = time.time()

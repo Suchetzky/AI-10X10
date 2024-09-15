@@ -78,6 +78,10 @@ def score_evaluation_function(current_game_state):
     # return 0
     return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
+def evaluation_function(game_state, weights):
+    heuristics = Heuristics()
+    return heuristics.heuristic(game_state.grid, weights)
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -94,9 +98,9 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evaluation_function='scoreEvaluationFunction', depth=2):
+    def __init__(self, evaluation_function='evaluation_function', depth=2):
         # self.evaluation_function = util.lookup(evaluation_function, globals())
-        self.evaluation_function = score_evaluation_function
+        self.evaluation_function = evaluation_function
         self.depth = depth
 
     @abc.abstractmethod
@@ -154,31 +158,80 @@ class MinmaxAgent(MultiAgentSearchAgent):
 
 
 
+# class AlphaBetaAgent(MultiAgentSearchAgent):
+#     """
+#     Your minimax agent with alpha-beta pruning (question 3)
+#     """
+#
+#     def get_action(self, game_state):
+#         """
+#         Returns the minimax action using self.depth and self.evaluationFunction
+#         """
+#         """*** YOUR CODE HERE ***"""
+#         return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
+#
+#     def alphabeta(self, game_state, depth, alpha, beta, max_player=True, action=None):
+#         if depth == 0:
+#             return Action.STOP, self.evaluation_function(game_state)
+#         if max_player:
+#             return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))
+#         else:
+#             return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
+#
+#     def max_value(self, game_state, depth, max_player, alpha, beta):
+#         score = float('-inf')
+#         max_action = None
+#         for action in game_state.get_successors():
+#             _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
+#             if v > score:
+#                 score = v
+#                 max_action = action
+#             alpha = max(alpha, score)
+#             if alpha >= beta:
+#                 break
+#         return max_action, score
+#
+#
+#     def min_value(self, game_state, depth, max_player, alpha, beta):
+#         score = float('inf')
+#         for game_state_, _ in game_state.get_successors():
+#             _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
+#             if v < score:
+#                 score = v
+#             beta = min(beta, score)
+#             if alpha >= beta:
+#                 break
+#         return None, score
+
+
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
-    Your minimax agent with alpha-beta pruning (question 3)
+    Minimax agent with alpha-beta pruning using a heuristic evaluation function.
     """
+
+    def __init__(self, evaluation_function, depth=3, weights=None):
+        super().__init__(evaluation_function=evaluation_function, depth=depth)
+        self.weights = weights  # Pass weights for the heuristic
 
     def get_action(self, game_state):
         """
-        Returns the minimax action using self.depth and self.evaluationFunction
+        Returns the best action using alpha-beta pruning
         """
-        """*** YOUR CODE HERE ***"""
         return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
 
-    def alphabeta(self, game_state, depth, alpha, beta, max_player=True, action=None):
-        if depth == 0:
-            return Action.STOP, self.evaluation_function(game_state)
+    def alphabeta(self, game_state, depth, alpha, beta, max_player=True):
+        if depth == 0 or game_state.is_goal_state():
+            return None, self.evaluation_function(game_state, self.weights)
         if max_player:
-            return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))
+            return self.max_value(game_state, depth, alpha, beta)
         else:
-            return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
+            return self.min_value(game_state, depth, alpha, beta)
 
-    def max_value(self, game_state, depth, max_player, alpha, beta):
+    def max_value(self, game_state, depth, alpha, beta):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
-            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
+            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, False)
             if v > score:
                 score = v
                 max_action = action
@@ -187,17 +240,17 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 break
         return max_action, score
 
-
-    def min_value(self, game_state, depth, max_player, alpha, beta):
+    def min_value(self, game_state, depth, alpha, beta):
         score = float('inf')
-        for game_state_, _ in game_state.get_successors():
-            _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
+        for action in game_state.get_successors():
+            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, True)
             if v < score:
                 score = v
             beta = min(beta, score)
             if alpha >= beta:
                 break
         return None, score
+
 
 
 
@@ -278,8 +331,8 @@ class Game_runner(object):
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
-            if self.draw:
-                self._state.draw()
+            # if self.draw:
+            #     self._state.draw()
             # opponent_action, _ = self.opponent_agent.get_action(self._state)
             # self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
             # self.display.update_state(self._state, action, opponent_action)
@@ -342,14 +395,49 @@ def track_memory_and_time_for_agent(game_instance):
 # Abbreviation
 better = better_evaluation_function
 
+import optuna
+
+def objective(trial):
+    # Suggest weights for the heuristic components
+    weights = {
+        'count_valid_moves_weight': trial.suggest_float('count_valid_moves_weight', -0, 10),
+        'holes_weight': trial.suggest_float('holes_weight', -10, 0),
+        'empty_cells_weight': trial.suggest_float('empty_cells_weight', 0, 10),
+        'smoothness_weight': trial.suggest_float('smoothness_weight', 0, 10),
+        'monotonicity_weight': trial.suggest_float('monotonicity_weight', 0, 10),
+        'merges_weight': trial.suggest_float('merges_weight', 0, 10),
+        'bumpiness_weight': trial.suggest_float('bumpiness_weight', 0, 10),
+        'corner_weight': trial.suggest_float('corner_weight', 0, 10),
+        'edge_weight': trial.suggest_float('edge_weight', 0, 10)
+    }
+
+    # Create a new game runner
+    agent = AlphaBetaAgent(evaluation_function=evaluation_function, weights=weights)
+    runner = Game_runner(agent=agent)
+
+    # Run the game and return the score (or some other performance metric)
+    initial_state = Game()  # Initialize your game state
+    score = runner.run(initial_state)
+
+    return score  # Optuna will aim to maximize this score
+
+# Create a study and optimize the objective function
+
+
 if __name__ == '__main__':
-    initial_game = Game(False, 10, 50, False)
+    study = optuna.create_study(direction='maximize')
+    study.optimize(objective, n_trials=100)  # Number of trials can be adjusted
+
+    # Get the best weights found by Optuna
+    print("Best weights:", study.best_params)
+
+    # initial_game = Game(False, 10, 50, False)
     # agent = AlphaBetaAgent(depth=1)
     # game_runner = Game_runner(agent, agent, draw=True)
-    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 5)
-    print(f"Average Time Taken: {avg_time:.4f} seconds")
-    print(f"Average Memory Used: {avg_memory:.4f} MB")
-    print(f"Average Score: {avg_score:.4f}")
+    # avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 5)
+    # print(f"Average Time Taken: {avg_time:.4f} seconds")
+    # print(f"Average Memory Used: {avg_memory:.4f} MB")
+    # print(f"Average Score: {avg_score:.4f}")
     # score = game_runner.run(initial_game)
     # print(score)
     # track_memory_and_time_for_agent(initial_game)
