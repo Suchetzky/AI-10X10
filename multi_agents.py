@@ -166,80 +166,31 @@ class MinmaxAgent(MultiAgentSearchAgent):
 
 
 
-# class AlphaBetaAgent(MultiAgentSearchAgent):
-#     """
-#     Your minimax agent with alpha-beta pruning (question 3)
-#     """
-#
-#     def get_action(self, game_state):
-#         """
-#         Returns the minimax action using self.depth and self.evaluationFunction
-#         """
-#         """*** YOUR CODE HERE ***"""
-    #     return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
-    #
-    # def alphabeta(self, game_state, depth, alpha, beta, max_player=True, action=None):
-    #     if depth == 0:
-    #         return Action.STOP,score_evaluation_function(game_state)
-    #     if max_player:
-    #         return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))
-    #     else:
-    #         return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
-    #
-    # def max_value(self, game_state, depth, max_player, alpha, beta):
-    #     score = float('-inf')
-    #     max_action = None
-    #     for action in game_state.get_successors():
-    #         _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
-    #         if v > score:
-    #             score = v
-    #             max_action = action
-    #         alpha = max(alpha, score)
-    #         if alpha >= beta:
-    #             break
-    #     return max_action, score
-    #
-    #
-    # def min_value(self, game_state, depth, max_player, alpha, beta):
-    #     score = float('inf')
-    #     for game_state_, _ in game_state.get_successors():
-    #         _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
-    #         if v < score:
-    #             score = v
-    #         beta = min(beta, score)
-    #         if alpha >= beta:
-    #             break
-    #     return None, score
-
-
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
-    Minimax agent with alpha-beta pruning using a heuristic evaluation function.
+    Your minimax agent with alpha-beta pruning (question 3)
     """
-
-    def __init__(self, evaluation_function, depth=3, weights=None):
-        super().__init__(evaluation_function=evaluation_function, depth=depth)
-        self.weights = weights  # Pass weights for the heuristic
 
     def get_action(self, game_state):
         """
-        Returns the best action using alpha-beta pruning
+        Returns the minimax action using self.depth and self.evaluationFunction
         """
+        """*** YOUR CODE HERE ***"""
         return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
 
-    def alphabeta(self, game_state, depth, alpha, beta, max_player=True):
-        if depth == 0 or game_state.is_goal_state():
-            return None, score_evaluation_function(game_state)
+    def alphabeta(self, game_state, depth, alpha, beta, max_player=True, action=None):
+        if depth == 0:
+            return Action.STOP,score_evaluation_function(game_state)
         if max_player:
-            return self.max_value(game_state, depth, alpha, beta)
+            return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))
         else:
-            return self.min_value(game_state, depth, alpha, beta)
+            return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
 
-    def max_value(self, game_state, depth, alpha, beta):
+    def max_value(self, game_state, depth, max_player, alpha, beta):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
-            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, False)
+            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
             if v > score:
                 score = v
                 max_action = action
@@ -248,10 +199,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 break
         return max_action, score
 
-    def min_value(self, game_state, depth, alpha, beta):
+
+    def min_value(self, game_state, depth, max_player, alpha, beta):
         score = float('inf')
-        for action in game_state.get_successors():
-            _, v = self.alphabeta(action[0], depth, alpha, beta, True)
+        for game_state_, _ in game_state.get_successors():
+            _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
             if v < score:
                 score = v
             beta = min(beta, score)
@@ -259,6 +211,54 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 break
         return None, score
 
+#
+# class AlphaBetaAgent(MultiAgentSearchAgent):
+#     """
+#     Minimax agent with alpha-beta pruning using a heuristic evaluation function.
+#     """
+#
+#     def __init__(self, evaluation_function, depth=3, weights=None):
+#         super().__init__(evaluation_function=evaluation_function, depth=depth)
+#         self.weights = weights  # Pass weights for the heuristic
+#
+#     def get_action(self, game_state):
+#         """
+#         Returns the best action using alpha-beta pruning
+#         """
+#         return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
+#
+#     def alphabeta(self, game_state, depth, alpha, beta, max_player=True):
+#         if depth == 0 or game_state.is_goal_state():
+#             return None, score_evaluation_function(game_state)
+#         if max_player:
+#             return self.max_value(game_state, depth, alpha, beta)
+#         else:
+#             return self.min_value(game_state, depth, alpha, beta)
+#
+#     def max_value(self, game_state, depth, alpha, beta):
+#         score = float('-inf')
+#         max_action = None
+#         for action in game_state.get_successors():
+#             _, v = self.alphabeta(action[0], depth - 1, alpha, beta, False)
+#             if v > score:
+#                 score = v
+#                 max_action = action
+#             alpha = max(alpha, score)
+#             if alpha >= beta:
+#                 break
+#         return max_action, score
+#
+#     def min_value(self, game_state, depth, alpha, beta):
+#         score = float('inf')
+#         for action in game_state.get_successors():
+#             _, v = self.alphabeta(action[0], depth, alpha, beta, True)
+        #     if v < score:
+        #         score = v
+        #     beta = min(beta, score)
+        #     if alpha >= beta:
+        #         break
+        # return None, score
+        #
 
 
 
@@ -335,7 +335,7 @@ class Game_runner(object):
         self._state = initial_state
         while not self._state.is_goal_state():
             action, score = self.agent.get_action(self._state)
-            print(self._state.get_score())
+            # print(self._state.get_score())
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
             self._state.place_part_in_board_if_valid_by_shape(action) # apply action
@@ -509,10 +509,10 @@ if __name__ == '__main__':
     #     print(weights)
 
         # Create a new game runner
-        agent = AlphaBetaAgent(depth=1)
-        runner = Game_runner(agent=agent)
+        # agent = AlphaBetaAgent(depth=1)
+        # runner = Game_runner(agent=agent)
     #
         # Run the game and return the score (or some other performance metric)
-        initial_state = Game()  # Initialize your game state
-        score = runner.run(initial_state)
-        print(score)
+        # initial_state = Game()  # Initialize your game state
+        # score = runner.run(initial_state)
+        # print(score)
