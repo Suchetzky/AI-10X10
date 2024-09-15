@@ -218,7 +218,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def expectimax(self, game_state, depth, max_player_flag):
         if depth == 0:
-            return Action.STOP, evaluation_function(game_state)
+            return Action.STOP, score_evaluation_function(game_state)
         if max_player_flag:
             score = float('-inf')
             max_action = None
@@ -235,7 +235,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 _, v = self.expectimax(action[0], depth - 1, not max_player_flag)
                 score += v
             if len(actions) == 0:
-                return None, self.evaluation_function(game_state)
+                return None, score_evaluation_function(game_state)
             return None, score / len(actions)
 
 def better_evaluation_function(current_game_state):
