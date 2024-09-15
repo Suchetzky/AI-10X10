@@ -9,7 +9,7 @@ def linear_regression_model():
     X = data.iloc[:, :-1].values  
     y = data.iloc[:, -1].values
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=12)
     
     model = LinearRegression()
     model.fit(X_train, y_train)
@@ -22,3 +22,5 @@ def linear_regression_model():
     print(f"Learned weights (coefficients): {model.coef_}")
     return model.coef_
 
+if __name__ == '__main__':
+    linear_regression_model()

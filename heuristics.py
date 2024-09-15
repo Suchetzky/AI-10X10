@@ -5,27 +5,28 @@ import numpy as np
 
 class Heuristics:
     _instance = None
-    holes_weight = -10
-    empty_cells_weight = 10
-    smoothness_weight = 10
-    monotonicity_weight = 10
-    merges_weight = 0
-    sum_close_coordinates_values_weight = 0
-    count_valid_moves_weight = 0
+    # holes_weight = 0
+    # empty_cells_weight = 0
+    # smoothness_weight = -1
+    # monotonicity_weight = 0
+    # merges_weight = 0
+    # sum_close_coordinates_values_weight = 0
+    # count_valid_moves_weight = 0
 
-    # holes_weight = random.randint(-10, 0)
-    # empty_cells_weight = random.randint(0, 10)
-    # smoothness_weight = random.randint(0, 10)
-    # monotonicity_weight = random.randint(0, 10)
-    # merges_weight = random.randint(0, 10)
+    holes_weight = random.randint(-10, 0)
+    empty_cells_weight = random.randint(-10, 0)
+    smoothness_weight = random.randint(0, 10)
+    monotonicity_weight = random.randint(0, 10)
+    merges_weight = random.randint(0, 10)
     # sum_close_coordinates_values_weight = random.randint(-10, 10)
-    # count_valid_moves_weight = random.randint(-10, 10)
+    count_valid_moves_weight = random.randint(0, 10)
+    blocks = 1
     weights = [holes_weight,
                empty_cells_weight,
                smoothness_weight,
                monotonicity_weight,
                merges_weight,
-               sum_close_coordinates_values_weight,
+               # sum_close_coordinates_values_weight,
                count_valid_moves_weight
                ]
 
@@ -33,18 +34,78 @@ class Heuristics:
         if cls._instance is None:
             cls._instance = super(Heuristics, cls).__new__(cls, *args, **kwargs)
         return cls._instance
-    # @classmethod
-    #
-    # def random_weights(cls):
-    #     cls.holes_weight = random.randint(-10, 10)
-    #     cls.empty_cells_weight = random.randint(-10, 10)
-    #     cls.smoothness_weight = random.randint(-10, 10)
-    #     cls.monotonicity_weight = random.randint(-10, 10)
-    #     cls.merges_weight = random.randint(-10, 10)
-    #     # cls.sum_close_coordinates_values_weight = random.randint(-10, 10)
-    #     cls.count_valid_moves_weight = random.randint(0, 10)
-    #     cls.weights = [cls.holes_weight, cls.empty_cells_weight, cls.smoothness_weight, cls.monotonicity_weight, cls.merges_weight, cls.count_valid_moves_weight]
-   
+    
+    @classmethod
+    def random_weights(cls):
+        cls.holes_weight = random.randint(-1, 1)
+        cls.empty_cells_weight = random.randint(-1, 1)
+        cls.smoothness_weight = random.randint(-1, 1)
+        cls.monotonicity_weight = random.randint(-1, 1)
+        cls.merges_weight = random.randint(-1, 1)
+        cls.count_valid_moves_weight = random.randint(-1, 1)
+        cls.blocks = random.randint(-1, 1)
+
+        # cls.holes_weight = 10.47743174
+        # cls.empty_cells_weight =  30.83350653
+        # cls.smoothness_weight = -12.93670911
+        # cls.monotonicity_weight = 1.35595286
+        # cls.merges_weight = 21.96272877
+        # cls.count_valid_moves_weight = 19.15243476
+        
+        # cls.holes_weight = 0.45567818
+        # cls.empty_cells_weight =  17.65677899
+        # cls.smoothness_weight = 9.99443012
+        # cls.monotonicity_weight = -10.71075892
+        # cls.merges_weight = 2.9763484
+        # cls.count_valid_moves_weight = -1.80218795
+        # -1,-1,-1,-1,0,1
+        # cls.holes_weight = -1
+        # cls.empty_cells_weight = -1
+        # cls.smoothness_weight = -1
+        # cls.monotonicity_weight = -1
+        # cls.merges_weight = 0
+        # cls.count_valid_moves_weight = 1
+        # -6.8106172   29.62203142   9.12958048 -15.96431503   6.7293583  1.6178059
+        # cls.holes_weight = -6.8106172
+        # cls.empty_cells_weight = 29.62203142
+        # cls.smoothness_weight = 9.12958048
+        # cls.monotonicity_weight = -15.96431503
+        # cls.merges_weight = 6.7293583
+        # cls.count_valid_moves_weight = 1.6178059
+        cls.weights = [cls.holes_weight, cls.empty_cells_weight, cls.smoothness_weight, cls.monotonicity_weight, cls.merges_weight, cls.count_valid_moves_weight, cls.blocks]
+        return cls.weights
+        
+    @staticmethod
+    def heuristic2_2x2_blocks(board):
+        rows = len(board.grid)
+        cols = len(board.grid[0])
+        score = 0
+
+        for i in range(rows - 1):
+            for j in range(cols - 1):
+                # Get the 2x2 block
+                block = [board.grid[i][j], board.grid[i][j + 1], board.grid[i + 1][j],
+                         board.grid[i + 1][j + 1]]
+                occupied_count = block.count(
+                    1)  # Assuming 1 represents occupied, 0 represents empty
+
+                if occupied_count == 4 or occupied_count == 0:
+                    # Best score: all 4 are either occupied or empty
+                    score += 3
+                elif (block[0] == block[1] and block[2] == block[3]) or (
+                        block[0] == block[2] and block[1] == block[3]):
+                    # Second best score: One row or one column is fully occupied or fully empty
+                    score += 2
+                elif occupied_count == 3 or occupied_count == 1:
+                    # Third best score: Three cells are occupied and one is empty, or vice versa
+                    score += 1
+                elif occupied_count == 2:
+                    # Worst score: chessboard-like pattern
+                    if (block[0] != block[1]) and (block[2] != block[3]) and (
+                            block[0] != block[2]):
+                        score -= 1  # Penalty for chessboard-like patterns
+
+        return score
     @classmethod
     def write_weights_to_csv(cls, heuristic_value):
         with open('data.csv', 'a') as csvfile:
@@ -63,55 +124,40 @@ class Heuristics:
                             col] == 1) and
                         (row - 1 <= 0 or board.grid[row - 1][col] == 1) and
                         (col - 1 <= 0 or board.grid[row][col - 1] == 1) and
-                        (col + 1 >= board.height or board.grid[row][
-                            col + 1] == 1)):
+                        (col + 1 >= board.height or board.grid[row][col + 1] == 1)):
                     holes += 1
         return holes
 
-    @staticmethod
-    def bumpiness_cols(board):
-        # Calculate the bumpiness of the board
-        # bumpiness = 0
-        # for col in range(board.width - 1):
-        #     bumpiness += abs(sum([board.grid[row][col] for row in
-        #                           range(board.height)]) - sum(
-        #         [board.grid[row][col + 1] for row in range(board.height)]))
-        # return bumpiness
-        col_sums = np.sum(board.grid, axis=0)
-        return np.sum(np.abs(np.diff(col_sums)))
-
-    @staticmethod
-    def bumpiness_rows(board):
-        # Calculate rows bumpiness
-        # bumpiness = 0
-        # for row in range(board.height):
-        #     bumpiness += abs(sum(board.grid[row]) - sum(board.grid[row]))
-        # return bumpiness
-        row_sums = np.sum(board.grid, axis=1)
-        return np.sum(np.abs(np.diff(row_sums)))
+    # @staticmethod
+    # def bumpiness_cols(board):
+    #     # Calculate the bumpiness of the board
+    #     # bumpiness = 0
+    #     # for col in range(board.width - 1):
+    #     #     bumpiness += abs(sum([board.grid[row][col] for row in
+    #     #                           range(board.height)]) - sum(
+    #     #         [board.grid[row][col + 1] for row in range(board.height)]))
+    #     # return bumpiness
+    #     col_sums = np.sum(board.grid, axis=0)
+    #     return np.sum(np.abs(np.diff(col_sums)))
+    # 
+    # @staticmethod
+    # def bumpiness_rows(board):
+    #     # Calculate rows bumpiness
+    #     # bumpiness = 0
+    #     # for row in range(board.height):
+    #     #     bumpiness += abs(sum(board.grid[row]) - sum(board.grid[row]))
+    #     # return bumpiness
+    #     row_sums = np.sum(board.grid, axis=1)
+    #     return np.sum(np.abs(np.diff(row_sums)))
 
     @staticmethod
     def empty_cells(board):
-        # Calculate the number of empty cells
-        # empty_cells = 0
-        # for row in range(board.height):
-        #     for col in range(board.width):
-        #         if board.grid[row][col] == 0:
-        #             empty_cells += 1
-        # return empty_cells
         grid = np.array(board.grid)
         return np.sum(grid == 0)
 
     @staticmethod
     def calculate_smoothness(board):
-        # smoothness = 0
-        # for i in range(board.height):
-        #     for j in range(board.height):
-        #         if i + 1 < board.height:  # Compare vertically
-        #             smoothness -= abs(board.grid[i][j] - board.grid[i + 1][j])
-        #         if j + 1 < len(board.grid[i]):  # Compare horizontally
-        #             smoothness -= abs(board.grid[i][j] - board.grid[i][j + 1])
-        # return smoothness
+
         smoothness = 0
         smoothness -= np.sum(
             np.abs(np.diff(board.grid, axis=0)))  # Vertical smoothness
@@ -121,15 +167,6 @@ class Heuristics:
 
     @staticmethod
     def calculate_monotonicity(board):
-        # monotonicity = 0
-        # for i in range(board.height):
-        #     row = board.grid[i]
-        #     if row == sorted(row) or row == sorted(row, reverse=True):
-        #         monotonicity += 1  # Row is monotonic
-        #     col = [board.grid[j][i] for j in range(board.height)]
-        #     if col == sorted(col) or col == sorted(col, reverse=True):
-        #         monotonicity += 1  # Column is monotonic
-        # return monotonicity
         grid = np.array(board.grid)
         monotonicity = 0
         for row in grid:
@@ -143,14 +180,6 @@ class Heuristics:
 
     @staticmethod
     def count_merge_opportunities(board):
-        # merges = 0
-        # for i in range(board.height):
-        #     for j in range(len(board.grid[i])):
-        #         if i + 1 < board.height and board.grid[i][j] == board.grid[i + 1][j]:
-        #             merges += 1
-        #         if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
-        #             merges += 1
-        # return merges
         grid = np.array(board.grid)
         merges = 0
         # Vectorized checking for adjacent merges (rows)
@@ -159,42 +188,6 @@ class Heuristics:
         merges += np.sum(grid[:-1, :] == grid[1:, :])
         return merges
 
-    # @staticmethod
-    # def sum_close_coordinates_values(board):
-    #     adjacent_sum = 0
-    #     for row in range(board.height):
-    #         for col in range(board.width):
-    #             if board.grid[row][col] != 0:
-    #                 # Check up, down, left, right
-    #                 if row > 0:
-    #                     adjacent_sum += board.grid[row - 1][col]
-    #                 if row < board.height - 1:
-    #                     adjacent_sum += board.grid[row + 1][col]
-    #                 if col > 0:
-    #                     adjacent_sum += board.grid[row][col - 1]
-    #                 if col < board.width - 1:
-    #                     adjacent_sum += board.grid[row][col + 1]
-    #     return adjacent_sum
-        # sum = 0
-        # for row in range(board.height):
-        #     for col in range(board.width):
-        #         if row + 1 < board.height:
-        #             sum += board.grid[row + 1][col]
-        #         else:
-        #             sum += 1
-        #         if row - 1 >= 0:
-        #             sum += board.grid[row - 1][col]
-        #         else:
-        #             sum += 1
-        #         if col + 1 < board.width:
-        #             sum += board.grid[row][col + 1]
-        #         else:
-        #             sum += 1
-        #         if col - 1 >= 0:
-        #             sum += board.grid[row][col - 1]
-        #         else:
-        #             sum += 1
-        # return sum
 
     @staticmethod
     def count_valid_moves(board):
@@ -203,14 +196,7 @@ class Heuristics:
         valid_moves += np.sum(grid[:, :-1] == grid[:, 1:])  # Horizontal
         valid_moves += np.sum(grid[:-1, :] == grid[1:, :])  # Vertical
         return valid_moves
-        # valid_moves = 0
-        # for i in range(len(board.grid)):
-        #     for j in range(len(board.grid[i])):
-        #         if i + 1 < len(board.grid) and board.grid[i][j] == board.grid[i + 1][j]:
-        #             valid_moves += 1
-        #         if j + 1 < len(board.grid[i]) and board.grid[i][j] == board.grid[i][j + 1]:
-        #             valid_moves += 1
-        # return valid_moves
+
 
     @staticmethod
     def heuristic(board):
@@ -220,20 +206,6 @@ class Heuristics:
                         Heuristics.smoothness_weight * Heuristics.calculate_smoothness(board) +
                         Heuristics.monotonicity_weight * Heuristics.calculate_monotonicity(board) +
                         Heuristics.merges_weight * Heuristics.count_merge_opportunities(board) +
-                        # Heuristics.sum_close_coordinates_values_weight * Heuristics.sum_close_coordinates_values(board) +
+                        Heuristics.blocks * Heuristics.heuristic2_2x2_blocks(board) +
                         Heuristics.count_valid_moves_weight * Heuristics.count_valid_moves(board))
 
-# if __name__ == '__main__':
-#     from Grid import Grid
-# 
-#     board = Grid(4, 4, 50)
-#     holes_weight = random.randint(-10, 0)
-#     bumpiness_cols_weight = random.randint(-10, 0)
-#     bumpiness_rows_weight = random.randint(-10, 0)
-#     blocks_of_shapes_weight = random.randint(0, 15)
-# 
-#     heuristic_value = Heuristics.heuristic(board,holes_weight, bumpiness_cols_weight, bumpiness_rows_weight, blocks_of_shapes_weight)
-#     print(heuristic_value)
-# 
-#     with open('data.csv', 'a') as csvfile:
-#         csvfile.write(f"{holes_weight},{bumpiness_cols_weight},{bumpiness_rows_weight},{blocks_of_shapes_weight},{heuristic_value}\n")

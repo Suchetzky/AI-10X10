@@ -299,28 +299,7 @@ def breadth_first_search(problem):
     queue = Queue()
     return bfs_dfs_helper(queue, problem)
 
-def suchetzky_empty_cells_heuristic(board):
-    return board.get_empty_cells()
-def a_star_search(problem, heuristic=None):
-    return a_star_helper(util.PriorityQueue(), problem, heuristic)
 
-def a_star_helper(data_type, game, heuristic): # todo check
-    data_type.push((game, []), 0)
-    visited = set()
-
-    while not data_type.isEmpty():
-        state, path= data_type.pop()
-
-        if state.is_goal_state():
-            return path, None
-        
-        if state not in visited:
-            visited.add(state)
-            for successor, actionNode in state.get_successors():
-                if successor not in visited:
-                    new_path = path + [actionNode]
-                    data_type.push((successor, new_path), -successor.get_score())
-    return [] , None
 
 def bfs_dfs_helper(data_type, game): # todo check
     data_type.push((game, [], []))
@@ -356,14 +335,15 @@ import pandas as pd
 
 def track_memory_and_time_for_dfs(game_instance):
     # Start tracing memory allocations
+    Heuristics.random_weights()
     tracemalloc.start()
 
     # Start the timer to track the time for depth_first_search
     start_time = time.time()
 
     # Run depth_first_search
-    solution_path, grid = a_star_search(game_instance, suchetzky_empty_cells_heuristic)
-    # solution_path = a_star_search(game_instance)
+    solution_path, grid = depth_first_search(game_instance)
+    solution_path = Astar.a_star_search(game_instance, Heuristics.heuristic)
     # Stop the timer
     # Heuristics.write_weights_to_csv(score)
     end_time = time.time()
@@ -374,6 +354,7 @@ def track_memory_and_time_for_dfs(game_instance):
     # Stop tracing memory allocations
     tracemalloc.stop()
 
+    Heuristics.write_weights_to_csv(end_time - start_time)
     # Return the time taken and peak memory usage
     return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
 
@@ -402,10 +383,10 @@ def run_multiple_times(game_instance, x):
     return avg_time, avg_memory
 
 if __name__ == '__main__':
-    initial_game = Game(False, 10, 50, False, True) # false- no UI, 5- board size, 50- cell size
+    initial_game = Game(False, 10, 50,False, True) # false-no UI, 5- board size, 50- cell size
     # initial_game.test()
     #initial_game.run() # run the game
-    avg_time, avg_memory = run_multiple_times(initial_game, 1)
+    avg_time, avg_memory = run_multiple_times(initial_game, 100)
     #solution_path, score = a_star_search(initial_game)
     #print(score)
     # Output the average time and memory used
