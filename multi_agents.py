@@ -106,7 +106,7 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evaluation_function='evaluation_function1', depth=2):
+    def __init__(self, evaluation_function='score_evaluation_function', depth=2):
         # self.evaluation_function = util.lookup(evaluation_function, globals())
         self.evaluation_function = evaluation_function
         self.depth = depth
@@ -229,7 +229,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     def alphabeta(self, game_state, depth, alpha, beta, max_player=True):
         if depth == 0 or game_state.is_goal_state():
-            return None, evaluation_function1(game_state, self.weights)
+            return None, score_evaluation_function(game_state)
         if max_player:
             return self.max_value(game_state, depth, alpha, beta)
         else:
