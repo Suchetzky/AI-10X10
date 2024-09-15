@@ -137,62 +137,118 @@ class Heuristics:
                 score += 1
         return score
 
-    def heuristic(self, board, weights):
-        return (weights['count_valid_moves_weight'] * self.count_valid_moves(board)
-                + weights['holes_weight'] * self.holes(board)
-                + weights['empty_cells_weight'] * self.empty_cells(board)
-                + weights['smoothness_weight'] * self.calculate_smoothness(board)
-                + weights[
-                    'monotonicity_weight'] * self.calculate_monotonicity(
-            board)
-                + weights['merges_weight'] * self.count_merge_opportunities(
-            board)
-                + weights['bumpiness_weight'] * (self.bumpiness_cols(
-            board) + self.bumpiness_rows(board))
-                + weights['corner_weight'] * self.corner_heuristic(board)
-                + weights['edge_weight'] * self.edge_heuristic(board)
-        )
+    def heuristic1_adjacent_pairs(self, board):
+        rows = len(board.grid)
+        cols = len(board.grid[0])
+        score = 0
 
-    # def heuristic(self, board):
-    #     # add weights to the different heuristics
-    #     # holes_weight = -10
-    #     # empty_cells_weight = 15
-    #     # smoothness_weight = 10
-    #     # monotonicity_weight = 0
-    #     # merges_weight = 0
-    #     count_valid_moves_weight = 1
-    #     holes_weight = -1
-    #     empty_cells_weight = 0
-    #     smoothness_weight = 0
-    #     monotonicity_weight = 0
-    #     merges_weight = 0
-    #     corner_weight = 0
-    #     edge_weight = 0
-    #     bumpiness_weight = -0
-    #     # count_valid_moves_weight = 4  # Reward finding valid moves more strongly
-    #     # holes_weight = -6  # Keep holes penalty high to prevent trapping blocks
-    #     # empty_cells_weight = 8  # Encourage empty cells for more flexibility
-    #     # smoothness_weight = 5  # Reward smoother transitions between adjacent tiles
-    #     # monotonicity_weight = 4  # Encourage keeping numbers increasing in a row/column
-    #     # merges_weight = 10  # Prioritize merging tiles for higher values
-    #     # corner_weight = 3  # Some reward for putting high-value tiles in corners
-    #     # edge_weight = 2  # Mild reward for placing tiles along edges
-    #     # bumpiness_weight = -3  # Penalize bumpiness, but not too heavily
-    #
-    #     # print(self.calculate_smoothness(board))
-    #
-    #     return (
-    #             count_valid_moves_weight * self.count_valid_moves(board)
-    #             + holes_weight * self.holes(board)
-    #             + empty_cells_weight * self.empty_cells(board)
-    #             + smoothness_weight * self.calculate_smoothness(board)
-    #             + monotonicity_weight * self.calculate_monotonicity(board)
-    #             + merges_weight * self.count_merge_opportunities(board)
-    #             + bumpiness_weight * (self.bumpiness_cols(board)+ self.bumpiness_rows(board))
-    #             + corner_weight * self.corner_heuristic(board)
-    #             + edge_weight * self.edge_heuristic(board)
-    #             + merges_weight * self.count_merge_opportunities(board)
-    #             )
+        # Check horizontal adjacent pairs
+        for i in range(rows):
+            for j in range(cols - 1):
+                if (board.grid[i][j] == board.grid[i][j + 1]):
+                    score += 1
+
+        # Check vertical adjacent pairs
+        for i in range(rows - 1):
+            for j in range(cols):
+                if (board.grid[i][j] == board.grid[i + 1][j]):
+                    score += 1
+
+        return score
+
+    def heuristic2_2x2_blocks(self, board):
+        rows = len(board.grid)
+        cols = len(board.grid[0])
+        score = 0
+
+        for i in range(rows - 1):
+            for j in range(cols - 1):
+                # Get the 2x2 block
+                block = [board.grid[i][j], board.grid[i][j + 1], board.grid[i + 1][j],
+                         board.grid[i + 1][j + 1]]
+                occupied_count = block.count(
+                    1)  # Assuming 1 represents occupied, 0 represents empty
+
+                if occupied_count == 4 or occupied_count == 0:
+                    # Best score: all 4 are either occupied or empty
+                    score += 3
+                elif (block[0] == block[1] and block[2] == block[3]) or (
+                        block[0] == block[2] and block[1] == block[3]):
+                    # Second best score: One row or one column is fully occupied or fully empty
+                    score += 2
+                elif occupied_count == 3 or occupied_count == 1:
+                    # Third best score: Three cells are occupied and one is empty, or vice versa
+                    score += 1
+                elif occupied_count == 2:
+                    # Worst score: chessboard-like pattern
+                    if (block[0] != block[1]) and (block[2] != block[3]) and (
+                            block[0] != block[2]):
+                        score -= 1  # Penalty for chessboard-like patterns
+
+        return score
+
+    # def heuristic(self, board, weights):
+    #     return (weights['count_valid_moves_weight'] * self.count_valid_moves(board)
+    #             + weights['holes_weight'] * self.holes(board)
+    #             + weights['empty_cells_weight'] * self.empty_cells(board)
+    #             + weights['smoothness_weight'] * self.calculate_smoothness(board)
+    #             + weights[
+    #                 'monotonicity_weight'] * self.calculate_monotonicity(
+    #         board)
+    #             + weights['merges_weight'] * self.count_merge_opportunities(
+    #         board)
+    #             + weights['bumpiness_weight'] * (self.bumpiness_cols(
+    #         board) + self.bumpiness_rows(board))
+    #             + weights['corner_weight'] * self.corner_heuristic(board)
+    #             + weights['edge_weight'] * self.edge_heuristic(board)
+    #             + weights['heur1_weight'] * self.heuristic1_adjacent_pairs(board)
+    #             + weights['heur2_weight'] * self.heuristic2_2x2_blocks(board)
+    #     )
+
+    def heuristic(self, board):
+        # add weights to the different heuristics
+        # holes_weight = -10
+        # empty_cells_weight = 15
+        # smoothness_weight = 10
+        # monotonicity_weight = 0
+        # merges_weight = 0
+        count_valid_moves_weight = 1
+        holes_weight = 0
+        empty_cells_weight = 0
+        smoothness_weight = 0
+        monotonicity_weight = 0
+        merges_weight = 0
+        corner_weight = 0
+        edge_weight = 0
+        bumpiness_weight = -0
+        heur1_weight = 0
+        heur2_weight = 1
+        # count_valid_moves_weight = 4  # Reward finding valid moves more strongly
+        # holes_weight = -6  # Keep holes penalty high to prevent trapping blocks
+        # empty_cells_weight = 8  # Encourage empty cells for more flexibility
+        # smoothness_weight = 5  # Reward smoother transitions between adjacent tiles
+        # monotonicity_weight = 4  # Encourage keeping numbers increasing in a row/column
+        # merges_weight = 10  # Prioritize merging tiles for higher values
+        # corner_weight = 3  # Some reward for putting high-value tiles in corners
+        # edge_weight = 2  # Mild reward for placing tiles along edges
+        # bumpiness_weight = -3  # Penalize bumpiness, but not too heavily
+
+        # print(self.calculate_smoothness(board))
+
+        return (
+                heur2_weight * self.heuristic2_2x2_blocks(board)
+                + heur1_weight * self.heuristic1_adjacent_pairs(board)
+                # count_valid_moves_weight * self.count_valid_moves(board)
+                #  holes_weight * self.holes(board)
+                # + empty_cells_weight * self.empty_cells(board)
+                # + smoothness_weight * self.calculate_smoothness(board)
+                # + monotonicity_weight * self.calculate_monotonicity(board)
+                # + merges_weight * self.count_merge_opportunities(board)
+                # + bumpiness_weight * (self.bumpiness_cols(board)+ self.bumpiness_rows(board))
+                # + corner_weight * self.corner_heuristic(board)
+                # + edge_weight * self.edge_heuristic(board)
+                # + merges_weight * self.count_merge_opportunities(board)
+                )
 
         # return (holes_weight * self.holes(board) +
         #         empty_cells_weight * self.empty_cells(board) +
