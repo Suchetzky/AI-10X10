@@ -196,16 +196,129 @@ class Heuristics:
         valid_moves += np.sum(grid[:, :-1] == grid[:, 1:])  # Horizontal
         valid_moves += np.sum(grid[:-1, :] == grid[1:, :])  # Vertical
         return valid_moves
+    
+    @staticmethod
+    def heuristic1_adjacent_pairs(board):
+        rows = len(board.grid)
+        cols = len(board.grid[0])
+        score = 0
+    
+        # Check horizontal adjacent pairs
+        for i in range(rows):
+            for j in range(cols - 1):
+                if (board.grid[i][j] == board.grid[i][j + 1]):
+                    score += 1
+    
+        # Check vertical adjacent pairs
+        for i in range(rows - 1):
+            for j in range(cols):
+                if (board.grid[i][j] == board.grid[i + 1][j]):
+                    score += 1
+    
+        return score
+    @staticmethod
+    def large_shape_fit_heuristic(board):
+        rows = len(board.grid)
+        cols = len(board.grid[0])
+        large_block_count = 0
+    
+        # Check for 3x3 block placement
+        for i in range(rows - 2):
+            for j in range(cols - 2):
+                if Heuristics.can_place_block(board, i, j, 3, 3):
+                    large_block_count += 1
+    
+        # Check for 5x1 block placement (horizontal)
+        for i in range(rows):
+            for j in range(cols - 4):
+                if Heuristics.can_place_block(board, i, j, 1, 5):
+                    large_block_count += 1
+    
+        # Check for 1x5 block placement (vertical)
+        for i in range(rows - 4):
+            for j in range(cols):
+                if Heuristics.can_place_block(board, i, j, 5, 1):
+                    large_block_count += 1
+    
+        return large_block_count
+    
+    def can_place_block(board, start_row, start_col, height, width):
+        # Check if a block of size (height, width) can fit starting at (start_row, start_col)
+        for i in range(start_row, start_row + height):
+            for j in range(start_col, start_col + width):
+                if board.grid[i][j] != 0:  # Assuming 0 represents an empty cell
+                    return False
+        return True
+
+
+    class SubBoardHeuristic:
+        # Example of how the preprocessed block probabilities might look:
+        block_probabilities = {
+            'completely_empty': 0.0,  # No chance of blocking when the sub-board is empty
+            'completely_full': 1.0,   # Blocks definitely can't fit in a full sub-board
+            'partially_filled': {
+                15: 0.1,  # Probability for 15 empty cells
+                14: 0.15, # Probability for 14 empty cells, and so on...
+                # ... additional probabilities for other configurations ...
+            }   
+        }
+
+        def __init__(self):
+            self.block_probabilities = {
+                'completely_empty': 0.0,  # No chance of blocking when the sub-board is empty
+                'completely_full': 1.0,   # Blocks definitely can't fit in a full sub-board
+                'partially_filled': {
+                    15: 0.1,  # Probability for 15 empty cells
+                    14: 0.15, # Probability for 14 empty cells, and so on...
+                    # ... additional probabilities for other configurations ...
+                }
+            }  # Precomputed probabilities of blocks not fitting into a 4x4 sub-board
+
+        def sub_board_analysis(self, board):
+            rows = len(board.grid)
+            cols = len(board.grid[0])
+            total_probability = 0
+    
+            # Iterate over the board, analyzing each 4x4 sub-board
+            for i in range(rows - 3):  # Rows where a 4x4 sub-board can fit
+                for j in range(cols - 3):  # Columns where a 4x4 sub-board can fit
+                    sub_board = self.get_sub_board(board, i, j)
+                    total_probability += self.calculate_sub_board_probability(sub_board)
+    
+            return total_probability
+    
+        def get_sub_board(self, board, row, col):
+            # Extract a 4x4 sub-board from the main board, starting at (row, col)
+            sub_board = []
+            for i in range(row, row + 4):
+                sub_board.append(board.grid[i][col:col + 4])
+            return sub_board
+        
+        def calculate_sub_board_probability(self, sub_board):
+            # Check how likely it is that blocks won't fit into the current sub-board
+            empty_cells = sum([row.count(0) for row in sub_board])  # Count empty cells in the sub-board
+    
+            # Based on the number of empty cells, look up the probability of blocks not fitting
+            # You might define more detailed probabilities for specific block types in the preprocessing phase.
+            if empty_cells == 16:
+                return self.block_probabilities['completely_empty']
+            elif empty_cells == 0:
+                return self.block_probabilities['completely_full']
+            else:
+                # Compute probability for partially filled sub-board
+                return self.block_probabilities['partially_filled'][empty_cells]
 
 
     @staticmethod
     def heuristic(board):
-        # add weights to the different heuristics        
-        return (Heuristics.holes_weight * Heuristics.holes(board) +
-                        Heuristics.empty_cells_weight * Heuristics.empty_cells(board) +
-                        Heuristics.smoothness_weight * Heuristics.calculate_smoothness(board) +
-                        Heuristics.monotonicity_weight * Heuristics.calculate_monotonicity(board) +
-                        Heuristics.merges_weight * Heuristics.count_merge_opportunities(board) +
-                        Heuristics.blocks * Heuristics.heuristic2_2x2_blocks(board) +
-                        Heuristics.count_valid_moves_weight * Heuristics.count_valid_moves(board))
-
+        # add weights to the different heuristics    
+        return Heuristics.heuristic1_adjacent_pairs(board) * 0.124 + Heuristics.heuristic2_2x2_blocks(board)*0.186 + Heuristics.large_shape_fit_heuristic(board)*0.156 +Heuristics.SubBoardHeuristic().sub_board_analysis(board)*0.534
+                
+        # return (Heuristics.holes_weight * Heuristics.holes(board) +
+        #                 Heuristics.empty_cells_weight * Heuristics.empty_cells(board) +
+        #                 Heuristics.smoothness_weight * Heuristics.calculate_smoothness(board) +
+        #                 Heuristics.monotonicity_weight * Heuristics.calculate_monotonicity(board) +
+        #                 Heuristics.merges_weight * Heuristics.count_merge_opportunities(board) +
+        #                 Heuristics.blocks * Heuristics.heuristic2_2x2_blocks(board) +
+        #                 Heuristics.count_valid_moves_weight * Heuristics.count_valid_moves(board))
+        # 
