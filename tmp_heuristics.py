@@ -187,6 +187,66 @@ class Heuristics:
 
         return score
 
+    def improved_heuristic2_2x2_blocks(self, board):
+        rows = len(board.grid)
+        cols = len(board.grid[0])
+        score = 0
+
+        for i in range(rows - 1):
+            for j in range(cols - 1):
+                # Get the 2x2 block
+                block = [board.grid[i][j], board.grid[i][j + 1],
+                         board.grid[i + 1][j], board.grid[i + 1][j + 1]]
+                occupied_count = block.count(
+                    1)  # Assuming 1 represents occupied, 0 represents empty
+
+                # Weighting based on proximity to the bottom of the board (more important)
+                row_weight = (rows - i) / rows
+
+                # Granular Scoring
+                if occupied_count == 4 or occupied_count == 0:
+                    # All occupied or all empty: full homogeneity
+                    score += 3 * row_weight
+                elif (block[0] == block[1] and block[2] == block[3]) or (
+                        block[0] == block[2] and block[1] == block[3]):
+                    # One row or column fully occupied/empty: partial homogeneity
+                    score += 2.5 * row_weight
+                elif occupied_count == 3 or occupied_count == 1:
+                    # Three occupied and one empty (or vice versa): moderate irregularity
+                    score += 1.5 * row_weight
+                elif occupied_count == 2:
+                    # Chessboard-like pattern: strong irregularity
+                    if (block[0] != block[1]) and (block[2] != block[3]) and (
+                            block[0] != block[2]):
+                        score -= 2 * row_weight  # Strong penalty for chessboard pattern
+                    else:
+                        score += 1 * row_weight  # Soft penalty for other 2x2 patterns
+
+                # Check neighboring blocks for continuity
+                if j < cols - 2:
+                    right_block = [board.grid[i][j + 1], board.grid[i][j + 2],
+                                   board.grid[i + 1][j + 1],
+                                   board.grid[i + 1][j + 2]]
+                    if block == right_block:
+                        score += 1 * row_weight  # Reward if the neighboring block is similar
+
+                if i < rows - 2:
+                    below_block = [board.grid[i + 1][j],
+                                   board.grid[i + 1][j + 1],
+                                   board.grid[i + 2][j],
+                                   board.grid[i + 2][j + 1]]
+                    if block == below_block:
+                        score += 1 * row_weight  # Reward if the block below is similar
+
+                # Extra points for potential row or column clearing
+                if sum(board.grid[i]) == cols:  # Full row clear
+                    score += 5
+                if sum([board.grid[k][j] for k in
+                        range(rows)]) == rows:  # Full column clear
+                    score += 5
+
+        return score
+
     # def heuristic(self, board, weights):
     #     return (weights['count_valid_moves_weight'] * self.count_valid_moves(board)
     #             + weights['holes_weight'] * self.holes(board)
@@ -205,6 +265,40 @@ class Heuristics:
     #             + weights['heur2_weight'] * self.heuristic2_2x2_blocks(board)
     #     )
 
+    def can_place_block(self, board, start_row, start_col, height, width):
+        # Check if a block of size (height, width) can fit starting at (start_row, start_col)
+        for i in range(start_row, start_row + height):
+            for j in range(start_col, start_col + width):
+                if board.grid[i][j] != 0:  # Assuming 0 represents an empty cell
+                    return False
+        return True
+
+    def large_shape_fit_heuristic(self, board):
+        rows = len(board.grid)
+        cols = len(board.grid[0])
+        large_block_count = 0
+
+        # Check for 3x3 block placement
+        for i in range(rows - 2):
+            for j in range(cols - 2):
+                if self.can_place_block(board, i, j, 3, 3):
+                    large_block_count += 1
+
+        # Check for 5x1 block placement (horizontal)
+        for i in range(rows):
+            for j in range(cols - 4):
+                if self.can_place_block(board, i, j, 1, 5):
+                    large_block_count += 1
+
+        # Check for 1x5 block placement (vertical)
+        for i in range(rows - 4):
+            for j in range(cols):
+                if self.can_place_block(board, i, j, 5, 1):
+                    large_block_count += 1
+
+        return large_block_count
+
+
     def heuristic(self, board):
         # add weights to the different heuristics
         # holes_weight = -10
@@ -212,17 +306,18 @@ class Heuristics:
         # smoothness_weight = 10
         # monotonicity_weight = 0
         # merges_weight = 0
-        count_valid_moves_weight = 1
-        holes_weight = 0
-        empty_cells_weight = 0
+        count_valid_moves_weight = 0.1
+        # holes_weight = 0
+        # empty_cells_weight = 0
         smoothness_weight = 0
-        monotonicity_weight = 0
-        merges_weight = 0
-        corner_weight = 0
-        edge_weight = 0
-        bumpiness_weight = -0
-        heur1_weight = 0
-        heur2_weight = 1
+        # monotonicity_weight = 0
+        # merges_weight = 0
+        # corner_weight = 0
+        # edge_weight = 0
+        # bumpiness_weight = 0
+        heur1_weight = 0.2
+        heur2_weight = 0.7
+        # large_shape_fit_weight = 0
         # count_valid_moves_weight = 4  # Reward finding valid moves more strongly
         # holes_weight = -6  # Keep holes penalty high to prevent trapping blocks
         # empty_cells_weight = 8  # Encourage empty cells for more flexibility
@@ -236,10 +331,12 @@ class Heuristics:
         # print(self.calculate_smoothness(board))
 
         return (
-                heur2_weight * self.heuristic2_2x2_blocks(board)
+                # large_shape_fit_weight * self.large_shape_fit_heuristic(board)
+                # + self.improved_heuristic2_2x2_blocks(board)
+                + heur2_weight * self.heuristic2_2x2_blocks(board)
                 + heur1_weight * self.heuristic1_adjacent_pairs(board)
-                # count_valid_moves_weight * self.count_valid_moves(board)
-                #  holes_weight * self.holes(board)
+                + count_valid_moves_weight * self.count_valid_moves(board)
+                # + holes_weight * self.holes(board)
                 # + empty_cells_weight * self.empty_cells(board)
                 # + smoothness_weight * self.calculate_smoothness(board)
                 # + monotonicity_weight * self.calculate_monotonicity(board)
