@@ -189,7 +189,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def min_value(self, game_state, depth, max_player, alpha, beta):
         score = float('inf')
         for game_state_, _ in game_state.get_successors():
-            _, v = self.alphabeta(game_state_, depth -1, alpha, beta, not max_player)
+            _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
             if v < score:
                 score = v
             beta = min(beta, score)
@@ -314,7 +314,7 @@ def track_memory_and_time_for_agent(game_instance):
 
 import os
 import pandas as pd
-from openpyxl import load_workbook
+# from openpyxl import load_workbook
 
 
 def save_to_excel(file_path, data):
