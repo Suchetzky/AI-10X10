@@ -13,22 +13,6 @@ import time
 import pandas as pd
 
 
-def isConsistent(board, move):
-    row, col = move.current_x, move.current_y
-    # Check if move is a corner of the board
-    if (row == 0 or row == len(board) - 1) and (
-            col == 0 or col == len(board[0]) - 1):
-        return True
-    # Check if move is adjacent to an already occupied block
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
-    for dr, dc in directions:
-        new_row, new_col = row + dr, col + dc
-        if 0 <= new_row < len(board) and 0 <= new_col < len(board[0]):
-            if board.grid[new_row][new_col] == 1:  # Assuming 1 means an occupied block
-                return True
-    # Otherwise, the move is inconsistent
-    return False
-
 class Agent(object):
     def __init__(self):
         super(Agent, self).__init__()
@@ -193,8 +177,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
-            if not isConsistent(game_state.grid, action[0]):
-                continue
             _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
             if v > score:
                 score = v
