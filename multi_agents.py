@@ -7,7 +7,7 @@ import util
 from Game import Game, run_multiple_times
 import abc
 
-from non_static_heuristics import Heuristics
+from heuristics import Heuristics
 from util import Node as Action
 import time
 import pandas as pd
@@ -330,12 +330,45 @@ def track_memory_and_time_for_agent(game_instance):
     return end_time - start_time, peak / 1024 / 1024, score  # time in seconds, memory in MB
 
 
+import os
+import pandas as pd
+from openpyxl import load_workbook
+
+
+def save_to_excel(file_path, data):
+    # Check if file exists
+    if os.path.exists(file_path):
+        # If file exists, open it and append the data to the existing sheet
+        with pd.ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
+            # Write new data, pandas automatically handles the appending process now
+            data.to_excel(writer, sheet_name='Results', index=False, header=False,
+                          startrow=writer.sheets['Results'].max_row)
+    else:
+        # If file does not exist, create a new file and write the data
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            data.to_excel(writer, sheet_name='Results', index=False)
 
 
 if __name__ == '__main__':
-    # print(Heuristics.random_weights())
+    # File path for the Excel file
+    file_path = 'results.xlsx'
+
+    # List to store results
+    results = []
+
+    # Simulate your game and collect results
     initial_game = Game(False, 10, 50, False)
-    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
-    print(f"Average Time Taken: {avg_time:.4f} seconds")
-    print(f"Average Memory Used: {avg_memory:.4f} MB")
-    print(f"Average Score: {avg_score:.4f}")
+    for i in range(1):
+        avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
+        # Collect the results in a dictionary (for easier DataFrame conversion)
+        results.append({
+            'Average Time Taken (s)': round(avg_time, 4),
+            'Average Memory Used (MB)': round(avg_memory, 4),
+            'Average Score': round(avg_score, 4)
+        })
+
+    # Convert results to a DataFrame
+    df_results = pd.DataFrame(results)
+
+    # Save results to Excel file
+    save_to_excel(file_path, df_results)
