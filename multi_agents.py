@@ -188,7 +188,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def min_value(self, game_state, depth, max_player, alpha, beta):
         score = float('inf')
         for game_state_, _ in game_state.get_successors():
-            _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
+            _, v = self.alphabeta(game_state_, depth-1, alpha, beta, not max_player)
             if v < score:
                 score = v
             beta = min(beta, score)
@@ -294,8 +294,8 @@ def track_memory_and_time_for_agent(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    agent = AlphaBetaAgent(depth=1)
-    opponent_agent = AlphaBetaAgent(depth=1)
+    agent = AlphaBetaAgent(depth=2)
+    opponent_agent = AlphaBetaAgent(depth=2)
     game_runner = Game_runner(agent, opponent_agent, draw=True)
     score = game_runner.run(game_instance)
     # Stop the timer
@@ -311,14 +311,12 @@ def track_memory_and_time_for_agent(game_instance):
     return end_time - start_time, peak / 1024 / 1024, score  # time in seconds, memory in MB
 
 
-# Abbreviation
-better = better_evaluation_function
 
 
 if __name__ == '__main__':
     # print(Heuristics.random_weights())
     initial_game = Game(False, 10, 50, False)
-    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 100)
+    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
     print(f"Average Time Taken: {avg_time:.4f} seconds")
     print(f"Average Memory Used: {avg_memory:.4f} MB")
     print(f"Average Score: {avg_score:.4f}")
