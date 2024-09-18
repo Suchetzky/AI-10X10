@@ -177,7 +177,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
-            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
+            _, v = self.alphabeta(action[0], depth -1, alpha, beta, not max_player)
             if v > score:
                 score = v
                 max_action = action
@@ -295,7 +295,7 @@ def track_memory_and_time_for_agent(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    agent = AlphaBetaAgent(depth=1)
+    agent = AlphaBetaAgent(depth=2)
     opponent_agent = AlphaBetaAgent(depth=1)
     game_runner = Game_runner(agent, opponent_agent, draw=True)
     score = game_runner.run(game_instance)
@@ -340,17 +340,20 @@ if __name__ == '__main__':
 
     # Simulate your game and collect results
     initial_game = Game(False, 10, 50, False)
-    for i in range(1):
-        avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 50)
+    for i in range(100):
+        results = []
+        avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
         # Collect the results in a dictionary (for easier DataFrame conversion)
         results.append({
             'Average Time Taken (s)': round(avg_time, 4),
             'Average Memory Used (MB)': round(avg_memory, 4),
-            'Average Score': round(avg_score, 4)
+            'Average Score': round(avg_score, 4),
+            'Depth': 2
         })
+        df_results = pd.DataFrame(results)
 
-    # Convert results to a DataFrame
-    df_results = pd.DataFrame(results)
+        # Save results to Excel file
+        save_to_excel(file_path, df_results)
+        print(f"Run {i} :" + f"{avg_score}")
 
-    # Save results to Excel file
-    save_to_excel(file_path, df_results)
+
