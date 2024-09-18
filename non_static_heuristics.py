@@ -22,22 +22,6 @@ class Heuristics:
                     holes += 1
         return holes
 
-    def bumpiness_cols(self, board):
-        # Calculate the bumpiness of the board
-        bumpiness = 0
-        for col in range(board.width - 1):
-            bumpiness += abs(sum([board.grid[row][col] for row in
-                                  range(board.height)]) - sum(
-                [board.grid[row][col + 1] for row in range(board.height)]))
-        return bumpiness
-
-    def bumpiness_rows(self, board):
-        # Calculate rows bumpiness
-        bumpiness = 0
-        for row in range(board.height):
-            bumpiness += abs(sum(board.grid[row]) - sum(board.grid[row]))
-        return bumpiness
-
     def empty_cells(self, board):
         grid = np.array(board.grid)
         return np.sum(grid == 0)
@@ -113,26 +97,7 @@ class Heuristics:
                 score += 1
         return score
 
-    def heuristic1_adjacent_pairs(self, board):
-        rows = len(board.grid)
-        cols = len(board.grid[0])
-        score = 0
-
-        # Check horizontal adjacent pairs
-        for i in range(rows):
-            for j in range(cols - 1):
-                if (board.grid[i][j] == board.grid[i][j + 1]):
-                    score += 1
-
-        # Check vertical adjacent pairs
-        for i in range(rows - 1):
-            for j in range(cols):
-                if (board.grid[i][j] == board.grid[i + 1][j]):
-                    score += 1
-
-        return score
-
-    def heuristic2_2x2_blocks(self, board):
+    def heuristic_blocks(self, board):
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -162,39 +127,6 @@ class Heuristics:
                         score -= 1  # Penalty for chessboard-like patterns
 
         return score
-
-    def can_place_block(self, board, start_row, start_col, height, width):
-        # Check if a block of size (height, width) can fit starting at (start_row, start_col)
-        for i in range(start_row, start_row + height):
-            for j in range(start_col, start_col + width):
-                if board.grid[i][j] != 0:  # Assuming 0 represents an empty cell
-                    return False
-        return True
-
-    def large_shape_fit_heuristic(self, board):
-        rows = len(board.grid)
-        cols = len(board.grid[0])
-        large_block_count = 0
-
-        # Check for 3x3 block placement
-        for i in range(rows - 2):
-            for j in range(cols - 2):
-                if self.can_place_block(board, i, j, 3, 3):
-                    large_block_count += 1
-
-        # Check for 5x1 block placement (horizontal)
-        for i in range(rows):
-            for j in range(cols - 4):
-                if self.can_place_block(board, i, j, 1, 5):
-                    large_block_count += 1
-
-        # Check for 1x5 block placement (vertical)
-        for i in range(rows - 4):
-            for j in range(cols):
-                if self.can_place_block(board, i, j, 5, 1):
-                    large_block_count += 1
-
-        return large_block_count
 
     def heuristic(self, board):
         count_valid_moves_weight = 0
