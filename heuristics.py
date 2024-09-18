@@ -79,7 +79,7 @@ class Heuristics:
         return cls.weights
 
     @staticmethod
-    def heuristic2_2x2_blocks(board):
+    def heuristic_blocks(board):
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -310,7 +310,7 @@ class Heuristics:
         #     board) * 0.186 + Heuristics.large_shape_fit_heuristic(
         #     board) * 0.156 + Heuristics.sub_board_analysis_heuristic(
         #     board) * 0.534
-        return 0.7 * Heuristics.heuristic2_2x2_blocks(board) + 0.3 * Heuristics.snack(board)
+        return 0.7 * Heuristics.heuristic_blocks(board) + 0.3 * Heuristics.snack(board)
 
     @staticmethod
     def snack(board):
