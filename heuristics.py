@@ -211,13 +211,13 @@ class Heuristics:
         # Check horizontal adjacent pairs
         for i in range(rows):
             for j in range(cols - 1):
-                if (board.grid[i][j] == board.grid[i][j + 1]):
+                if board.grid[i][j] == board.grid[i][j + 1]:
                     score += 1
 
         # Check vertical adjacent pairs
         for i in range(rows - 1):
             for j in range(cols):
-                if (board.grid[i][j] == board.grid[i + 1][j]):
+                if board.grid[i][j] == board.grid[i + 1][j]:
                     score += 1
 
         return score
@@ -256,7 +256,6 @@ class Heuristics:
                 if board.grid[i][j] != 0:  # Assuming 0 represents an empty cell
                     return False
         return True
-
 
     @staticmethod
     def _generate_preprocessed_probabilities():
@@ -306,12 +305,31 @@ class Heuristics:
     @staticmethod
     def heuristic(board):
         # add weights to the different heuristics    
-        return Heuristics.heuristic1_adjacent_pairs(
-            board) * 0.124 + Heuristics.heuristic2_2x2_blocks(
-            board) * 0.186 + Heuristics.large_shape_fit_heuristic(
-            board) * 0.156 + Heuristics.sub_board_analysis_heuristic(
-            board) * 0.534
+        # return Heuristics.heuristic1_adjacent_pairs(
+        #     board) * 0.124 + Heuristics.heuristic2_2x2_blocks(
+        #     board) * 0.186 + Heuristics.large_shape_fit_heuristic(
+        #     board) * 0.156 + Heuristics.sub_board_analysis_heuristic(
+        #     board) * 0.534
+        return 0.7 * Heuristics.heuristic2_2x2_blocks(board) + 0.3 * Heuristics.snack(board)
 
+    @staticmethod
+    def snack(board):
+        score_full = 1
+        score_empty = 1
+        prev_occupied_count = [board.grid[0][0], board.grid[0][1],
+                               board.grid[1][0], board.grid[1][1]].count(1)
+        for i in range(len(board.grid)-1):
+            for j in range(1,len(board.grid[0])-1):
+                block = [board.grid[i][j], board.grid[i][j + 1],
+                         board.grid[i + 1][j],
+                         board.grid[i + 1][j + 1]]
+                occupied_count = block.count(1)
+                if prev_occupied_count == 4 and occupied_count == 4:
+                    score_full = score_full + 1
+                elif prev_occupied_count == 0 and occupied_count == 0:
+                    score_empty = score_empty + 1
+                prev_occupied_count = occupied_count
+        return score_full + score_empty
         # return (Heuristics.holes_weight * Heuristics.holes(board) +
         #                 Heuristics.empty_cells_weight * Heuristics.empty_cells(board) +
         #                 Heuristics.smoothness_weight * Heuristics.calculate_smoothness(board) +
@@ -320,3 +338,7 @@ class Heuristics:
         #                 Heuristics.blocks * Heuristics.heuristic2_2x2_blocks(board) +
         #                 Heuristics.count_valid_moves_weight * Heuristics.count_valid_moves(board))
         #
+    
+# Average Time Taken: 609.9167 seconds
+# Average Memory Used: 0.9288 MB
+# Average Score: 6409.0000
