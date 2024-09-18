@@ -12,6 +12,23 @@ from util import Node as Action
 import time
 import pandas as pd
 
+
+def isConsistent(board, move):
+    row, col = move.current_x, move.current_y
+    # Check if move is a corner of the board
+    if (row == 0 or row == len(board) - 1) and (
+            col == 0 or col == len(board[0]) - 1):
+        return True
+    # Check if move is adjacent to an already occupied block
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
+    for dr, dc in directions:
+        new_row, new_col = row + dr, col + dc
+        if 0 <= new_row < len(board) and 0 <= new_col < len(board[0]):
+            if board.grid[new_row][new_col] == 1:  # Assuming 1 means an occupied block
+                return True
+    # Otherwise, the move is inconsistent
+    return False
+
 class Agent(object):
     def __init__(self):
         super(Agent, self).__init__()
@@ -176,6 +193,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
+            if not isConsistent(game_state.grid, action[0]):
+                continue
             _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
             if v > score:
                 score = v
@@ -188,7 +207,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def min_value(self, game_state, depth, max_player, alpha, beta):
         score = float('inf')
         for game_state_, _ in game_state.get_successors():
-            _, v = self.alphabeta(game_state_, depth-1, alpha, beta, not max_player)
+            _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
             if v < score:
                 score = v
             beta = min(beta, score)
@@ -294,8 +313,8 @@ def track_memory_and_time_for_agent(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    agent = AlphaBetaAgent(depth=2)
-    opponent_agent = AlphaBetaAgent(depth=2)
+    agent = AlphaBetaAgent(depth=1)
+    opponent_agent = AlphaBetaAgent(depth=1)
     game_runner = Game_runner(agent, opponent_agent, draw=True)
     score = game_runner.run(game_instance)
     # Stop the timer
