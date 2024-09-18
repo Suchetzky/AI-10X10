@@ -7,7 +7,7 @@ import util
 from Game import Game, run_multiple_times
 import abc
 
-from tmp_heuristics import Heuristics
+from non_static_heuristics import Heuristics
 from util import Node as Action
 import time
 import pandas as pd
