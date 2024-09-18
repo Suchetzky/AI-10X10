@@ -7,7 +7,7 @@ import util
 from Game import Game, run_multiple_times
 import abc
 
-from heuristics import Heuristics
+from tmp_heuristics import Heuristics
 from util import Node as Action
 import time
 import pandas as pd
@@ -74,9 +74,7 @@ def score_evaluation_function(current_game_state):
     This evaluation function is meant for use with adversarial search agents
     (not reflex agents).
     """
-    # return current_game_state.score
     h = Heuristics()
-    # return 0
     return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
 class MultiAgentSearchAgent(Agent):
@@ -187,7 +185,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 break
         return max_action, score
 
-
     def min_value(self, game_state, depth, max_player, alpha, beta):
         score = float('inf')
         for game_state_, _ in game_state.get_successors():
@@ -238,45 +235,28 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 return None, score_evaluation_function(game_state)
             return None, score / len(actions)
 
-def better_evaluation_function(current_game_state):
-    """
-    Your extreme 2048 evaluation function (question 5).
-
-    DESCRIPTION: <write something here so we know what you did>
-    """
-    "*** YOUR CODE HERE ***"
-    return Heuristics.heuristic(current_game_state.grid)
-    # heuristics = Heuristics(current_game_state)
-
-
-
-
 class Game_runner(object):
-    def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), display=None, sleep_between_actions=True, draw=True):
+    def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), sleep_between_actions=True, draw=True):
         super(Game_runner, self).__init__()
         self.sleep_between_actions = sleep_between_actions
         self.agent = agent
-        # self.display = display
         self.opponent_agent = opponent_agent
         self._state = None
-        self._should_quit = False
         self.draw = draw
 
     def run(self, initial_state):
         self._state = initial_state
         while not self._state.is_goal_state():
             action, score = self.agent.get_action(self._state)
-            # print(self._state.get_score())
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
-            self._state.place_part_in_board_if_valid_by_shape(action) # apply action
-            # if self.draw:
-            #     self._state.draw()
-            # opponent_action, _ = self.opponent_agent.get_action(self._state)
-            # self._state.place_part_in_board_if_valid_by_shape(opponent_action) # apply opponent action todo check if this is correct
-            # self.display.update_state(self._state, action, opponent_action)
-            # if self.draw:
-            #     self._state.draw()
+            self._state.place_part_in_board_if_valid_by_shape(action)  # apply action
+            if self.draw:
+                self._state.draw()
+            opponent_action, _ = self.opponent_agent.get_action(self._state)
+            self._state.place_part_in_board_if_valid_by_shape(opponent_action)  # apply opponent action
+            if self.draw:
+                self._state.draw()
         return self._state.get_score()
 
 
@@ -315,9 +295,9 @@ def track_memory_and_time_for_agent(game_instance):
 
     # Run depth_first_search
     agent = AlphaBetaAgent(depth=1)
-    game_runner = Game_runner(agent, agent, draw=True)
+    opponent_agent = AlphaBetaAgent(depth=1)
+    game_runner = Game_runner(agent, opponent_agent, draw=True)
     score = game_runner.run(game_instance)
-    # print(score)
     # Stop the timer
     end_time = time.time()
 
@@ -336,22 +316,9 @@ better = better_evaluation_function
 
 
 if __name__ == '__main__':
-    print(Heuristics.random_weights())
+    # print(Heuristics.random_weights())
     initial_game = Game(False, 10, 50, False)
-    agent = AlphaBetaAgent(depth=1)
-    game_runner = Game_runner(agent, agent, draw=True)
-    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
+    avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 100)
     print(f"Average Time Taken: {avg_time:.4f} seconds")
     print(f"Average Memory Used: {avg_memory:.4f} MB")
     print(f"Average Score: {avg_score:.4f}")
-
-# [0, 1, -1, 0, 1, 0, 1]
-# [0, 0, 1, -1, 0, -1, 1]
-# Average Time Taken: 26.0149 seconds
-# Average Memory Used: 0.5335 MB
-# Average Score: 5450.0000
-# [-1, 1, 0, -1, 1, 1, 1]
-# Average Time Taken: 49.2861 seconds
-# Average Memory Used: 0.5414 MB
-# Average Score: 10969.0000
-# 
