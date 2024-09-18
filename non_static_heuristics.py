@@ -197,9 +197,9 @@ class Heuristics:
         return large_block_count
 
     def heuristic(self, board):
-        count_valid_moves_weight = 0.1
-        heur1_weight = 0.2
-        heur2_weight = 0.7
+        count_valid_moves_weight = 0
+        heur1_weight = 0
+        heur2_weight = 1
         return (
                 + heur2_weight * self.heuristic2_2x2_blocks(board)
                 + heur1_weight * self.heuristic1_adjacent_pairs(board)
