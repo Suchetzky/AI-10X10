@@ -169,7 +169,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if depth == 0:
             return Action.STOP,score_evaluation_function(game_state)
         if max_player:
-            return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))
+            return self.max_value(game_state, depth, max_player, float('-inf'), float('inf'))
         else:
             return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
 
@@ -177,7 +177,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
-            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
+            _, v = self.alphabeta(action[0], depth -1, alpha, beta, not max_player)
             if v > score:
                 score = v
                 max_action = action
@@ -189,7 +189,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def min_value(self, game_state, depth, max_player, alpha, beta):
         score = float('inf')
         for game_state_, _ in game_state.get_successors():
-            _, v = self.alphabeta(game_state_, depth, alpha, beta, not max_player)
+            _, v = self.alphabeta(game_state_, depth -1, alpha, beta, not max_player)
             if v < score:
                 score = v
             beta = min(beta, score)
@@ -341,6 +341,7 @@ if __name__ == '__main__':
     # Simulate your game and collect results
     initial_game = Game(False, 10, 50, False)
     for i in range(1):
+        results = []
         avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
         # Collect the results in a dictionary (for easier DataFrame conversion)
         results.append({
@@ -348,9 +349,10 @@ if __name__ == '__main__':
             'Average Memory Used (MB)': round(avg_memory, 4),
             'Average Score': round(avg_score, 4)
         })
+        df_results = pd.DataFrame(results)
 
-    # Convert results to a DataFrame
-    df_results = pd.DataFrame(results)
+        # Save results to Excel file
+        save_to_excel(file_path, df_results)
+        print(f"Run {i}")
 
-    # Save results to Excel file
-    save_to_excel(file_path, df_results)
+
