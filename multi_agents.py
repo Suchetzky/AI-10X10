@@ -169,7 +169,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if depth == 0:
             return Action.STOP,score_evaluation_function(game_state)
         if max_player:
-            return self.max_value(game_state, depth, not max_player, float('-inf'), float('inf'))
+            return self.max_value(game_state, depth, max_player, float('-inf'), float('inf'))
         else:
             return self.min_value(game_state, depth, max_player, float('-inf'), float('inf'))
 
@@ -314,7 +314,7 @@ def track_memory_and_time_for_agent(game_instance):
 
 import os
 import pandas as pd
-from openpyxl import load_workbook
+# from openpyxl import load_workbook
 
 
 def save_to_excel(file_path, data):
@@ -341,7 +341,7 @@ if __name__ == '__main__':
     # Simulate your game and collect results
     initial_game = Game(False, 10, 50, False)
     for i in range(1):
-        avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
+        avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 50)
         # Collect the results in a dictionary (for easier DataFrame conversion)
         results.append({
             'Average Time Taken (s)': round(avg_time, 4),
