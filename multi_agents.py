@@ -246,11 +246,13 @@ class GreedyAgent(MultiAgentSearchAgent):
         return self.greedy(game_state, self.depth)
 
     def greedy(self, game_state, depth):
-        if depth == 0:
+        if depth == 0 or game_state.is_goal_state():
             return Action.STOP, score_evaluation_function(game_state)
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
+            if action[0].get_score() > 100 and score_evaluation_function(action[0]) < score - 100:
+                continue
             _, v = self.greedy(action[0], depth - 1)
             if v > score:
                 score = v
@@ -275,7 +277,6 @@ class Game_runner(object):
             self._state.place_part_in_board_if_valid_by_shape(action)  # apply action
             if self.draw:
                 self._state.draw()
-            # print(self._state.get_score())
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action)  # apply opponent action
             if self.draw:
@@ -334,25 +335,6 @@ def track_memory_and_time_for_agent(game_instance):
     return end_time - start_time, peak / 1024 / 1024, score  # time in seconds, memory in MB
 
 
-import os
-import pandas as pd
-# from openpyxl import load_workbook
-
-
-def save_to_excel(file_path, data):
-    # Check if file exists
-    if os.path.exists(file_path):
-        # If file exists, open it and append the data to the existing sheet
-        with pd.ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
-            # Write new data, pandas automatically handles the appending process now
-            data.to_excel(writer, sheet_name='Results', index=False, header=False,
-                          startrow=writer.sheets['Results'].max_row)
-    else:
-        # If file does not exist, create a new file and write the data
-        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-            data.to_excel(writer, sheet_name='Results', index=False)
-
-
 if __name__ == '__main__':
     # File path for the Excel file
     file_path = 'results.xlsx'
@@ -362,7 +344,7 @@ if __name__ == '__main__':
 
     # Simulate your game and collect results
     initial_game = Game(False, 10, 50, False)
-    for i in range(100):
+    for i in range(1):
         avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
         # Collect the results in a dictionary (for easier DataFrame conversion)
         print({
@@ -371,8 +353,3 @@ if __name__ == '__main__':
             'Average Score': round(avg_score, 4)
         })
 
-    # Convert results to a DataFrame
-    # df_results = pd.DataFrame(results)
-    #
-    # # Save results to Excel file
-    # save_to_excel(file_path, df_results)
