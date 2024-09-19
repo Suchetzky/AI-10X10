@@ -1,12 +1,10 @@
-import random
+import abc
+import time
 import tracemalloc
 
 import numpy as np
-import abc
-import util
-from Game import Game, run_multiple_times
-import abc
 
+from Game import Game
 from heuristics import Heuristics
 from util import Node as Action
 import time
@@ -177,7 +175,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = float('-inf')
         max_action = None
         for action in game_state.get_successors():
-            _, v = self.alphabeta(action[0], depth -1, alpha, beta, not max_player)
+            _, v = self.alphabeta(action[0], depth - 1, alpha, beta, not max_player)
             if v > score:
                 score = v
                 max_action = action
@@ -236,6 +234,29 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 return None, score_evaluation_function(game_state)
             return None, score / len(actions)
 
+class GreedyAgent(MultiAgentSearchAgent):
+    def get_action(self, game_state):
+        """
+        Returns the expectimax action using self.depth and self.evaluationFunction
+
+        The opponent should be modeled as choosing uniformly at random from their
+        legal moves.
+        """
+        """*** YOUR CODE HERE ***"""
+        return self.greedy(game_state, self.depth)
+
+    def greedy(self, game_state, depth):
+        if depth == 0:
+            return Action.STOP, score_evaluation_function(game_state)
+        score = float('-inf')
+        max_action = None
+        for action in game_state.get_successors():
+            _, v = self.greedy(action[0], depth - 1)
+            if v > score:
+                score = v
+                max_action = action
+        return max_action, score
+
 class Game_runner(object):
     def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(), sleep_between_actions=True, draw=True):
         super(Game_runner, self).__init__()
@@ -254,6 +275,7 @@ class Game_runner(object):
             self._state.place_part_in_board_if_valid_by_shape(action)  # apply action
             if self.draw:
                 self._state.draw()
+            # print(self._state.get_score())
             opponent_action, _ = self.opponent_agent.get_action(self._state)
             self._state.place_part_in_board_if_valid_by_shape(opponent_action)  # apply opponent action
             if self.draw:
@@ -295,8 +317,8 @@ def track_memory_and_time_for_agent(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    agent = AlphaBetaAgent(depth=2)
-    opponent_agent = AlphaBetaAgent(depth=1)
+    agent = GreedyAgent(depth=2)
+    opponent_agent = GreedyAgent(depth=2)
     game_runner = Game_runner(agent, opponent_agent, draw=True)
     score = game_runner.run(game_instance)
     # Stop the timer
@@ -341,19 +363,16 @@ if __name__ == '__main__':
     # Simulate your game and collect results
     initial_game = Game(False, 10, 50, False)
     for i in range(100):
-        results = []
         avg_time, avg_memory, avg_score = run_multiple_times(initial_game, 1)
         # Collect the results in a dictionary (for easier DataFrame conversion)
-        results.append({
+        print({
             'Average Time Taken (s)': round(avg_time, 4),
             'Average Memory Used (MB)': round(avg_memory, 4),
-            'Average Score': round(avg_score, 4),
-            'Depth': 2
+            'Average Score': round(avg_score, 4)
         })
-        df_results = pd.DataFrame(results)
 
-        # Save results to Excel file
-        save_to_excel(file_path, df_results)
-        print(f"Run {i} :" + f"{avg_score}")
-
-
+    # Convert results to a DataFrame
+    # df_results = pd.DataFrame(results)
+    #
+    # # Save results to Excel file
+    # save_to_excel(file_path, df_results)
