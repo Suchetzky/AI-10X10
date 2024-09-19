@@ -1,3 +1,4 @@
+import argparse
 import tkinter as tk
 from tkinter import font as tkFont
 
@@ -10,6 +11,7 @@ from util import Node
 import util
 import time
 import tracemalloc
+import multi_agents
 
 # Set up display dimensions
 screen_width, screen_height = 900, 700
@@ -32,6 +34,7 @@ class Game:
         self.score = 0
         self.headless = NoUI # game is runninf with or without graphical interface
         self.running = True
+        self.goal_state = 10000
         if not self.headless:
             self._setup_ui()
 
@@ -247,7 +250,7 @@ class Game:
         return successors
 
     def is_goal_state(self):
-        return self.score >= 100000
+        return self.score >= self.goal_state
 
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
@@ -333,7 +336,7 @@ import tracemalloc
 import time
 import pandas as pd
 
-def track_memory_and_time_for_dfs(game_instance):
+def track_memory_and_time_for_dfs(game_instance, format='DFS', agents='AlphaBetaAgent', draw=True):
     # Start tracing memory allocations
     Heuristics.random_weights()
     tracemalloc.start()
@@ -343,7 +346,10 @@ def track_memory_and_time_for_dfs(game_instance):
 
     # Run depth_first_search
     solution_path, grid = depth_first_search(game_instance)
+    # Run A* search
     solution_path = Astar.a_star_search(game_instance, Heuristics.heuristic)
+    initial_game.run_from_code(solution_path)
+
     # Stop the timer
     # Heuristics.write_weights_to_csv(score)
     end_time = time.time()
@@ -358,14 +364,13 @@ def track_memory_and_time_for_dfs(game_instance):
     # Return the time taken and peak memory usage
     return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
 
-def run_multiple_times(game_instance, x):
+def run_multiple_times(game_instance):
     # List to store the results
     results = []
 
-    for i in range(1, x + 1):
+    for i in range(1, args.num_of_games + 1):
         # Recreate the game instance each time (to reset the game state)
         new_game_instance = game_instance.deepcopy()
-
         # Track memory and time for the current run
         time_taken, memory_used = track_memory_and_time_for_dfs(new_game_instance)
 
@@ -379,19 +384,65 @@ def run_multiple_times(game_instance, x):
     avg_time = df["Time Taken (seconds)"].mean()
     avg_memory = df["Memory Used (MB)"].mean()
 
+    print(f"Average Time Taken: {avg_time:.4f} seconds")
+    print(f"Average Memory Used: {avg_memory:.4f} MB")
+
     # Return the averages
     return avg_time, avg_memory
 
+def main():
+    parser = argparse.ArgumentParser(description='10x10 Game')
+    format = ['play', 'DFS', 'A*', 'agents']
+    parser.add_argument("--format", help="choose format", type=str, default='play', choices=format)
+    args = parser.parse_args()
+    if args.format == 'play':
+        initial_game = Game(False, 10, 50, False, True)
+        initial_game.run()
+
 if __name__ == '__main__':
-    initial_game = Game(False, 10, 50,False, True) # false-no UI, 5- board size, 50- cell size
-    # initial_game.test()
-    #initial_game.run() # run the game
-    avg_time, avg_memory = run_multiple_times(initial_game, 100)
-    #solution_path, score = a_star_search(initial_game)
-    #print(score)
-    # Output the average time and memory used
-    print(f"Average Time Taken: {avg_time:.4f} seconds")
-    print(f"Average Memory Used: {avg_memory:.4f} MB")
+    parser = argparse.ArgumentParser(description='10x10 Game')
+    format = ['play', 'DFS', 'A_star', 'agent']
+    agents = ['GreedyAgent', 'AlphaBetaAgent', 'ExpectimaxAgent']
+    parser.add_argument("--display", help="The game UI. True for GUI False otherwise", type=bool, default=False)
+    parser.add_argument("--format", help="choose format: 'play', 'DFS', 'A_star', 'agents'", type=str, default='play', choices=format)
+    parser.add_argument('--agent', choices=agents, help='The agent. default is AlphaBetaAgent', default=agents[1], type=str)
+    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.',
+                        default=1, type=int)
+    parser.add_argument('--sleep_between_actions',
+                        help='Should sleep between actions.', default=False, type=bool)
+    parser.add_argument('--score_goal', help='The score goal to reach. for DFS and A_star', default=10000, type=int)
+    args = parser.parse_args()
+    initial_game = Game(not args.display, 10, 50, False, args.sleep_between_actions)
+    initial_game.goal_state = args.score_goal
+    if args.format == 'play':
+            initial_game.run()
+    elif args.format == 'DFS':
+        solution_path, grid = depth_first_search(initial_game)
+        if args.display:
+            initial_game.run_from_code(solution_path)
+    elif args.format == 'A_star':
+        solution_path = Astar.a_star_search(initial_game, Heuristics.heuristic)
+        if args.display:
+            initial_game.run_from_code(solution_path)
+    elif args.format == 'agent':
+        agent = multi_agents.AlphaBetaAgent(depth=args.depth)
+        if args.agent == 'GreedyAgent':
+            agent = multi_agents.GreedyAgent()
+        elif args.agent == 'AlphaBetaAgent':
+            agent = multi_agents.AlphaBetaAgent(depth=args.depth)
+        elif args.agent == 'ExpectimaxAgent':
+            agent = multi_agents.ExpectimaxAgent(depth=args.depth)
+        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display)
+        score = game_runner.run(initial_game)
+        print(score)
+
+
+    # avg_time, avg_memory = run_multiple_times(initial_game, 100)
+    # #solution_path, score = a_star_search(initial_game)
+    # #print(score)
+    # # Output the average time and memory used
+    # print(f"Average Time Taken: {avg_time:.4f} seconds")
+    # print(f"Average Memory Used: {avg_memory:.4f} MB")
     # Heuristics.random_weights()
     # solution_path, grid = track_memory_and_time_for_dfs(initial_game)
     # print_path(grid)
