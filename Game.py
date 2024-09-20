@@ -443,13 +443,14 @@ def run_multiple_times(game_instance):
 def get_parser():
     global args
     parser = argparse.ArgumentParser(description='10x10 Game')
-    formats = ['play', 'DFS', 'A_star', 'agent']
+    formats = ['play', 'DFS', 'A_star', 'agent', 'BFS']
     agents = ['GreedyAgent', 'AlphaBetaAgent', 'ExpectimaxAgent']
+    t_f = ['True', 'False']
     parser.add_argument("--display",
                         help="The game UI. True for GUI False otherwise",
-                        type=bool, default=True)
+                        type=str, default='True')
     parser.add_argument("--format",
-                        help="choose format: 'play', 'DFS', 'A_star', 'agents'",
+                        help="choose format: 'play', 'DFS', 'A_star', 'agents', 'BFS'",
                         type=str, default='play', choices=formats)
     parser.add_argument('--agent', choices=agents,
                         help='The agent. default is AlphaBetaAgent',
@@ -458,8 +459,8 @@ def get_parser():
                         help='The maximum depth for to search in the game tree.',
                         default=1, type=int)
     parser.add_argument('--sleep_between_actions',
-                        help='Should sleep between actions.', default=False,
-                        type=bool)
+                        help='Should sleep between actions.', default='False',
+                        type=str)
     parser.add_argument('--score_goal',
                         help='The score goal to reach. for DFS and A_star',
                         default=10000, type=int)
@@ -471,9 +472,11 @@ if __name__ == '__main__':
     args = get_parser()
     initial_game = Game(False, 10, 50, False,
                         args.sleep_between_actions, goal_state=args.score_goal)
-    initial_game.headless = not args.display
+    initial_game.headless = True if args.display == 'False' else False
+    initial_game.sleep_between_actions = True if args.sleep_between_actions == 'True' else False
     initial_game.goal_state = args.score_goal
     agent = multi_agents.AlphaBetaAgent(depth=args.depth)
+    solution_path = []
     if args.agent == 'GreedyAgent':
         agent = multi_agents.GreedyAgent()
     elif args.agent == 'AlphaBetaAgent':
@@ -494,8 +497,10 @@ if __name__ == '__main__':
     elif args.format == 'A_star':
         solution_path = Astar.a_star_search(initial_game, Heuristics.heuristic)
     elif args.format == 'agent':
-        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display, sleep_between_actions=args.sleep_between_actions)
+        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display, sleep_between_actions=initial_game.sleep_between_actions)
         score = game_runner.run(initial_game)
+    elif args.format == 'BFS':
+        solution_path, grid = breadth_first_search(initial_game)
     # Stop the timer
     end_time = time.time()
     # Stop memory tracing and get the statistics
