@@ -19,7 +19,7 @@ screen_width, screen_height = 900, 700
 
 class Game:
     def __init__(self, NoUI=False, board_len=10, size=50, test=False,
-                 sleep_between_actions=False):
+                 sleep_between_actions=False, goal_state=10000):
         self.board_len = board_len
         self.size = size
         self.grid = Grid(board_len, board_len, size)
@@ -38,7 +38,7 @@ class Game:
         self.score = 0
         self.headless = NoUI  # game is runninf with or without graphical interface
         self.running = True
-        self.goal_state = 10000
+        self.goal_state = goal_state
         if not self.headless:
             self._setup_ui()
 
@@ -225,13 +225,22 @@ class Game:
     def get_board(self):
         return self.grid.grid
 
+
     def get_score(self):
         return self.score
 
+    """
+    # Get the next shapes
+    # @return: a list of the next shapes
+    """
     def get_next_shapes(self):
         return [shape.shape for shape in self.next_shapes]
 
+    """
     # get all valid placements for a shape
+    # @param shape: the shape to place
+    # @return: a list of tuples, where each tuple contains the x and y coordinates of a valid placement
+    """
     def get_valid_placements(self, shape):
         valid_placements = []
         for y in range(self.grid.height):
@@ -240,6 +249,10 @@ class Game:
                     valid_placements.append((x, y))
         return valid_placements
 
+    """
+    # Get valid placements for the next shapes
+    # @return: a list of tuples, where each tuple contains a new game instance and the action taken to reach that state
+    """
     def get_valid_placements(self):
         valid_placements = []
         for y in range(self.grid.height):
@@ -249,6 +262,10 @@ class Game:
                     valid_placements.append((x, y))
         return valid_placements
 
+    """
+    # Get the successors of the current state
+    # @return: a list of tuples, where each tuple contains a new game instance and the action taken to reach that state
+    """
     def get_successors(self):
         successors = []
         if len(self.next_shapes) == 0:  # just if we finish the shapes batch we will randomly add 3 new shapes
@@ -263,9 +280,17 @@ class Game:
                     (x, y, piece_num, self.next_shapes))))
         return successors
 
+    """
+    # Check if the current state is a goal state
+    # @return: True if the current state is a goal state, False otherwise
+    """
     def is_goal_state(self):
         return self.score >= self.goal_state
 
+    """
+    # Deep copy of the game
+    # @return: a new game instance with the same state as the current game
+    """
     def deepcopy(self):
         new_game = Game(NoUI=True, board_len=self.board_len, size=self.size)
         new_game.grid = Grid(self.board_len, self.board_len, self.size)
@@ -275,9 +300,11 @@ class Game:
         new_game.current_x = self.current_x
         new_game.current_y = self.current_y
         new_game.score = self.score
+        new_game.sleep_between_actions = self.sleep_between_actions
+        new_game.goal_state = self.goal_state
         return new_game
 
-    ###### Halel test ######
+    ###### test ######
     def test(self):
         self.grid.place_shape(Shape.shapes[9], 0, 0)
         for row in self.grid.grid:
@@ -290,13 +317,6 @@ class Game:
         print(self.get_board())
 
     #### for agents ####
-
-    def generate_successor(self, action):
-        util.raiseNotDefined()
-        # successor = self.deepcopy()
-        # successor.place_part_in_board_if_valid(action[0], action[1])
-        # return successor
-
     def __lt__(self, other):
         return self.get_score() < other.get_score()
 
@@ -304,16 +324,30 @@ class Game:
 
 
 ######################## DFS BFS ########################
+"""
+# DFS search
+# @param problem: the problem to solve
+# @return: the solution path and the grid
+"""
 def depth_first_search(problem):
     stack = Stack()
     return bfs_dfs_helper(stack, problem)
 
-
+"""
+# BFS search
+# @param problem: the problem to solve
+# @return: the solution path and the grid
+"""
 def breadth_first_search(problem):
     queue = Queue()
     return bfs_dfs_helper(queue, problem)
 
-
+"""
+# Helper function for BFS and DFS
+# @param data_type: the data structure to use
+# @param game: the game to solve
+# @return: the solution path and the grid
+"""
 def bfs_dfs_helper(data_type, game):
     data_type.push((game, [], []))
     visited = set()
@@ -339,9 +373,12 @@ import tracemalloc
 import time
 import pandas as pd
 
-
-def track_memory_and_time_for_dfs(game_instance, format='DFS',
-                                  agents='AlphaBetaAgent', draw=True):
+"""
+# Track memory and time for collecting data
+# @param game_instance: the game instance to solve
+# @return: the time taken and peak memory usage
+"""
+def track_memory_and_time_(game_instance):
     # Start tracing memory allocations
     Heuristics.random_weights()
     tracemalloc.start()
@@ -369,9 +406,11 @@ def track_memory_and_time_for_dfs(game_instance, format='DFS',
     # Return the time taken and peak memory usage
     return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
 
-###
-# For data collection
-###
+"""
+# run multiple times For data collection
+# @param game_instance: the game instance to solve
+# @return: the average time taken and peak memory usage
+"""
 def run_multiple_times(game_instance):
     # List to store the results
     results = []
@@ -380,7 +419,7 @@ def run_multiple_times(game_instance):
         # Recreate the game instance each time (to reset the game state)
         new_game_instance = game_instance.deepcopy()
         # Track memory and time for the current run
-        time_taken, memory_used = track_memory_and_time_for_dfs(
+        time_taken, memory_used = track_memory_and_time_(
             new_game_instance)
 
         # Append the results (run number, time, memory)
@@ -401,26 +440,15 @@ def run_multiple_times(game_instance):
     return avg_time, avg_memory
 
 
-def main():
-    parser = argparse.ArgumentParser(description='10x10 Game')
-    format = ['play', 'DFS', 'A*', 'agents']
-    parser.add_argument("--format", help="choose format", type=str,
-                        default='play', choices=format)
-    args = parser.parse_args()
-    if args.format == 'play':
-        initial_game = Game(False, 10, 50, False, True)
-        initial_game.run()
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='10x10 Game')
-    format = ['play', 'DFS', 'A_star', 'agent']
+    format = ['play', 'DFS', 'A_star', 'agent', 'BFS']
     agents = ['GreedyAgent', 'AlphaBetaAgent', 'ExpectimaxAgent']
     parser.add_argument("--display",
                         help="The game UI. True for GUI False otherwise",
                         type=bool, default=True)
     parser.add_argument("--format",
-                        help="choose format: 'play', 'DFS', 'A_star', 'agents'",
+                        help="choose format: 'play', 'DFS', 'A_star', 'agents', 'BFS'",
                         type=str, default='play', choices=format)
     parser.add_argument('--agent', choices=agents,
                         help='The agent. default is AlphaBetaAgent',
@@ -436,18 +464,49 @@ if __name__ == '__main__':
                         default=10000, type=int)
     args = parser.parse_args()
     initial_game = Game(False, 10, 50, False,
-                        args.sleep_between_actions)
+                        args.sleep_between_actions, goal_state=args.score_goal)
     initial_game.headless = not args.display
     initial_game.goal_state = args.score_goal
+    # Start tracing memory allocations
+    tracemalloc.start()
+    # Start the timer to track the time for depth_first_search
+    start_time = time.time()
+    current, peak = None, None
     if args.format == 'play':
         initial_game.headless = False
         initial_game.run()
+        end_time = time.time()
+        # Stop memory tracing and get the statistics
+        current, peak = tracemalloc.get_traced_memory()
+        # Stop tracing memory allocations
+        tracemalloc.stop()
     elif args.format == 'DFS':
         solution_path, grid = depth_first_search(initial_game)
+        # Stop the timer
+        end_time = time.time()
+        # Stop memory tracing and get the statistics
+        current, peak = tracemalloc.get_traced_memory()
+        # Stop tracing memory allocations
+        tracemalloc.stop()
         if args.display:
             initial_game.run_from_code(solution_path)
     elif args.format == 'A_star':
         solution_path = Astar.a_star_search(initial_game, Heuristics.heuristic)
+        end_time = time.time()
+        # Stop memory tracing and get the statistics
+        current, peak = tracemalloc.get_traced_memory()
+        # Stop tracing memory allocations
+        tracemalloc.stop()
+        if args.display:
+            initial_game.run_from_code(solution_path)
+    elif args.format == 'BFS':
+        solution_path, grid = breadth_first_search(initial_game)
+        # Stop the timer
+        end_time = time.time()
+        # Stop memory tracing and get the statistics
+        current, peak = tracemalloc.get_traced_memory()
+        # Stop tracing memory allocations
+        tracemalloc.stop()
         if args.display:
             initial_game.run_from_code(solution_path)
     elif args.format == 'agent':
@@ -460,4 +519,15 @@ if __name__ == '__main__':
             agent = multi_agents.ExpectimaxAgent(depth=args.depth)
         game_runner = multi_agents.Game_runner(agent, agent, draw=args.display)
         score = game_runner.run(initial_game)
+        end_time = time.time()
+        # Stop memory tracing and get the statistics
+        current, peak = tracemalloc.get_traced_memory()
+        # Stop tracing memory allocations
+        tracemalloc.stop()
         print(score)
+    # Calculate the time taken
+    time_taken = end_time - start_time
+    memory_used = peak / 1024 / 1024
+    # Print the time taken and peak memory usage
+    print(f"Time Taken: {time_taken:.4f} seconds")
+    print(f"Peak Memory Usage: {memory_used:.4f} MB")
