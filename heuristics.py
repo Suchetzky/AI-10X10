@@ -25,6 +25,9 @@ class Heuristics:
             cls._instance = super(Heuristics, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
+    """
+    # This function is used for analysis score of the board
+    """
     @classmethod
     def random_weights(cls):
         cls.holes_weight = random.randint(-1, 1)
@@ -40,14 +43,12 @@ class Heuristics:
                        cls.blocks]
         return cls.weights
 
+    """
+    # Heuristic function that evaluates the quality of partials boards blocks, rewarding 
+    # smoothness blocks, penalizing holes and empty cells. 
+    """
     @staticmethod
     def heuristic_blocks(board):
-        """
-        Heuristic function that evaluates the board based on the number of 2x2 blocks
-        
-        :param board: 
-        :return: 
-        """
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -79,6 +80,9 @@ class Heuristics:
 
         return score
 
+    """
+    # write the weights and heuristic value to a csv file, for data analysis
+    """
     @classmethod
     def write_weights_to_csv(cls, heuristic_value):
         with open('data.csv', 'a') as csvfile:
@@ -114,14 +118,21 @@ class Heuristics:
                     holes -= 1
         return holes
 
+    """
+    # This function is not used in the final implementation, just for testing purposes
+    # Calculate the number of empty cells on the board
+    """
     @staticmethod
     def empty_cells(board):
         grid = np.array(board.grid)
         return np.sum(grid == 0)
 
+    """
+    # This function is not used in the final implementation, just for testing purposes
+    # Calculate the smoothness of the board
+    """
     @staticmethod
     def calculate_smoothness(board):
-
         smoothness = 0
         smoothness -= np.sum(
             np.abs(np.diff(board.grid, axis=0)))  # Vertical smoothness
@@ -129,6 +140,10 @@ class Heuristics:
             np.abs(np.diff(board.grid, axis=1)))  # Horizontal smoothness
         return smoothness
 
+    """
+    # This function is not used in the final implementation, just for testing purposes
+    # Calculate the monotonicity of the board
+    """
     @staticmethod
     def calculate_monotonicity(board):
         grid = np.array(board.grid)
@@ -141,6 +156,10 @@ class Heuristics:
                 monotonicity += 1
         return monotonicity
 
+    """
+    # This function is not used in the final implementation, just for testing purposes
+    # Count the number of merge opportunities on the board
+    """
     @staticmethod
     def count_merge_opportunities(board):
         grid = np.array(board.grid)
@@ -151,6 +170,10 @@ class Heuristics:
         merges += np.sum(grid[:-1, :] == grid[1:, :])
         return merges
 
+    """
+    # This function is not used in the final implementation, just for testing purposes
+    # Count the number of valid moves on the board
+    """
     @staticmethod
     def count_valid_moves(board):
         grid = np.array(board.grid)
@@ -159,6 +182,10 @@ class Heuristics:
         valid_moves += np.sum(grid[:-1, :] == grid[1:, :])  # Vertical
         return valid_moves
 
+    """
+    # This function is not used in the final implementation, just for testing purposes
+    # Check for adjacent pairs in the board
+    """
     @staticmethod
     def adjacent_pairs(board):
         rows = len(board.grid)
@@ -179,6 +206,10 @@ class Heuristics:
 
         return score
 
+    """
+    # This function is not used in the final implementation, just for testing purposes
+    # Check if large blocks can fit in the board
+    """
     @staticmethod
     def large_shape_fit_heuristic(board):
         rows = len(board.grid)
@@ -205,6 +236,10 @@ class Heuristics:
 
         return large_block_count
 
+    """
+    # helper function for large_shape_fit_heuristic
+    # check if a block of size (height, width) can fit starting at (start_row, start_col)
+    """
     @staticmethod
     def can_place_block(board, start_row, start_col, height, width):
         # Check if a block of size (height, width) can fit starting at (start_row, start_col)
@@ -213,51 +248,6 @@ class Heuristics:
                 if board.grid[i][j] != 0:  # Assuming 0 represents an empty cell
                     return False
         return True
-
-    @staticmethod
-    def _generate_preprocessed_probabilities():
-        # Precompute probabilities for all possible 4x4 sub-board configurations
-        # This is a simplification. In a real scenario, this would be based on block-fitting logic
-        probabilities = {}
-        for i in range(2 ** 16):  # 16 cells in a 4x4 board, 2^16 configurations
-            probabilities[i] = random.uniform(0,
-                                              1)  # Random probability between 0 and 1
-        return probabilities
-
-    @staticmethod
-    def _sub_board_to_index(sub_board):
-        # Convert a 4x4 sub-board into a unique integer index to use for lookup
-        # Assuming the board is filled with 0s (empty) and 1s (occupied)
-        index = 0
-        for i in range(4):
-            for j in range(4):
-                index = (index << 1) | sub_board[i][
-                    j]  # Shift left and add the bit
-        return index
-
-    @staticmethod
-    def sub_board_analysis_heuristic(board):
-        rows = len(board.grid)
-        cols = len(board.grid[0])
-        total_probability = 0
-
-        # Loop over the board, extracting 4x4 sub-boards
-        for i in range(rows - 3):
-            for j in range(cols - 3):
-                # Extract the 4x4 sub-board
-                sub_board = [row[j:j + 4] for row in board.grid[i:i + 4]]
-
-                # Convert the sub-board to a unique index
-                sub_board_index = Heuristics._sub_board_to_index(sub_board)
-
-                # Look up the preprocessed probability for this sub-board
-                probability = Heuristics._generate_preprocessed_probabilities()[
-                    sub_board_index]
-
-                # Add the probability to the total heuristic score
-                total_probability += probability
-
-        return total_probability
 
     @staticmethod
     def snack(board):
