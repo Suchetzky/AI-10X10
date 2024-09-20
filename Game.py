@@ -440,16 +440,17 @@ def run_multiple_times(game_instance):
     return avg_time, avg_memory
 
 
-if __name__ == '__main__':
+def get_parser():
+    global args
     parser = argparse.ArgumentParser(description='10x10 Game')
-    format = ['play', 'DFS', 'A_star', 'agent', 'BFS']
+    formats = ['play', 'DFS', 'A_star', 'agent']
     agents = ['GreedyAgent', 'AlphaBetaAgent', 'ExpectimaxAgent']
     parser.add_argument("--display",
                         help="The game UI. True for GUI False otherwise",
                         type=bool, default=True)
     parser.add_argument("--format",
-                        help="choose format: 'play', 'DFS', 'A_star', 'agents', 'BFS'",
-                        type=str, default='play', choices=format)
+                        help="choose format: 'play', 'DFS', 'A_star', 'agents'",
+                        type=str, default='play', choices=formats)
     parser.add_argument('--agent', choices=agents,
                         help='The agent. default is AlphaBetaAgent',
                         default=agents[1], type=str)
@@ -463,10 +464,23 @@ if __name__ == '__main__':
                         help='The score goal to reach. for DFS and A_star',
                         default=10000, type=int)
     args = parser.parse_args()
+    return args
+
+
+if __name__ == '__main__':
+    args = get_parser()
     initial_game = Game(False, 10, 50, False,
                         args.sleep_between_actions, goal_state=args.score_goal)
     initial_game.headless = not args.display
     initial_game.goal_state = args.score_goal
+    agent = multi_agents.AlphaBetaAgent(depth=args.depth)
+    if args.agent == 'GreedyAgent':
+        agent = multi_agents.GreedyAgent()
+    elif args.agent == 'AlphaBetaAgent':
+        agent = multi_agents.AlphaBetaAgent(depth=args.depth)
+    elif args.agent == 'ExpectimaxAgent':
+        agent = multi_agents.ExpectimaxAgent(depth=args.depth)
+    score = 0
     # Start tracing memory allocations
     tracemalloc.start()
     # Start the timer to track the time for depth_first_search
@@ -475,59 +489,26 @@ if __name__ == '__main__':
     if args.format == 'play':
         initial_game.headless = False
         initial_game.run()
-        end_time = time.time()
-        # Stop memory tracing and get the statistics
-        current, peak = tracemalloc.get_traced_memory()
-        # Stop tracing memory allocations
-        tracemalloc.stop()
     elif args.format == 'DFS':
         solution_path, grid = depth_first_search(initial_game)
-        # Stop the timer
-        end_time = time.time()
-        # Stop memory tracing and get the statistics
-        current, peak = tracemalloc.get_traced_memory()
-        # Stop tracing memory allocations
-        tracemalloc.stop()
-        if args.display:
-            initial_game.run_from_code(solution_path)
     elif args.format == 'A_star':
         solution_path = Astar.a_star_search(initial_game, Heuristics.heuristic)
-        end_time = time.time()
-        # Stop memory tracing and get the statistics
-        current, peak = tracemalloc.get_traced_memory()
-        # Stop tracing memory allocations
-        tracemalloc.stop()
-        if args.display:
-            initial_game.run_from_code(solution_path)
-    elif args.format == 'BFS':
-        solution_path, grid = breadth_first_search(initial_game)
-        # Stop the timer
-        end_time = time.time()
-        # Stop memory tracing and get the statistics
-        current, peak = tracemalloc.get_traced_memory()
-        # Stop tracing memory allocations
-        tracemalloc.stop()
-        if args.display:
-            initial_game.run_from_code(solution_path)
     elif args.format == 'agent':
-        agent = multi_agents.AlphaBetaAgent(depth=args.depth)
-        if args.agent == 'GreedyAgent':
-            agent = multi_agents.GreedyAgent()
-        elif args.agent == 'AlphaBetaAgent':
-            agent = multi_agents.AlphaBetaAgent(depth=args.depth)
-        elif args.agent == 'ExpectimaxAgent':
-            agent = multi_agents.ExpectimaxAgent(depth=args.depth)
-        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display)
+        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display, sleep_between_actions=args.sleep_between_actions)
         score = game_runner.run(initial_game)
-        end_time = time.time()
-        # Stop memory tracing and get the statistics
-        current, peak = tracemalloc.get_traced_memory()
-        # Stop tracing memory allocations
-        tracemalloc.stop()
-        print(score)
+    # Stop the timer
+    end_time = time.time()
+    # Stop memory tracing and get the statistics
+    current, peak = tracemalloc.get_traced_memory()
+    # Stop tracing memory allocations
+    tracemalloc.stop()
+    if args.display and args.format != 'play':
+        initial_game.run_from_code(solution_path)
     # Calculate the time taken
     time_taken = end_time - start_time
     memory_used = peak / 1024 / 1024
     # Print the time taken and peak memory usage
     print(f"Time Taken: {time_taken:.4f} seconds")
     print(f"Peak Memory Usage: {memory_used:.4f} MB")
+    if args.format == 'agent':
+        print(f"Score: {score}")
