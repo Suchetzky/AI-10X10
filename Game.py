@@ -369,7 +369,9 @@ def track_memory_and_time_for_dfs(game_instance, format='DFS',
     # Return the time taken and peak memory usage
     return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
 
-
+###
+# For data collection
+###
 def run_multiple_times(game_instance):
     # List to store the results
     results = []
@@ -416,7 +418,7 @@ if __name__ == '__main__':
     agents = ['GreedyAgent', 'AlphaBetaAgent', 'ExpectimaxAgent']
     parser.add_argument("--display",
                         help="The game UI. True for GUI False otherwise",
-                        type=bool, default=False)
+                        type=bool, default=True)
     parser.add_argument("--format",
                         help="choose format: 'play', 'DFS', 'A_star', 'agents'",
                         type=str, default='play', choices=format)
@@ -433,10 +435,12 @@ if __name__ == '__main__':
                         help='The score goal to reach. for DFS and A_star',
                         default=10000, type=int)
     args = parser.parse_args()
-    initial_game = Game(not args.display, 10, 50, False,
+    initial_game = Game(False, 10, 50, False,
                         args.sleep_between_actions)
+    initial_game.headless = not args.display
     initial_game.goal_state = args.score_goal
     if args.format == 'play':
+        initial_game.headless = False
         initial_game.run()
     elif args.format == 'DFS':
         solution_path, grid = depth_first_search(initial_game)
@@ -457,15 +461,3 @@ if __name__ == '__main__':
         game_runner = multi_agents.Game_runner(agent, agent, draw=args.display)
         score = game_runner.run(initial_game)
         print(score)
-
-    # avg_time, avg_memory = run_multiple_times(initial_game, 100)
-    # #solution_path, score = a_star_search(initial_game)
-    # #print(score)
-    # # Output the average time and memory used
-    # print(f"Average Time Taken: {avg_time:.4f} seconds")
-    # print(f"Average Memory Used: {avg_memory:.4f} MB")
-    # Heuristics.random_weights()
-    # solution_path, grid = track_memory_and_time_for_dfs(initial_game)
-    # print_path(grid)
-    # print("Solution Path:", solution_path)
-    #initial_game.run_from_code(solution_path) # run the game with the solution path
