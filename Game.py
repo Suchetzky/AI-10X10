@@ -44,6 +44,9 @@ class Game:
 
     ########## UI SETUP AND DRAWING ##########
 
+    """
+    # Set up the game UI
+    """
     def _setup_ui(self):
         self.root = tk.Tk()
         self.root.title('10x10 Game')
@@ -58,6 +61,9 @@ class Game:
         self.root.bind('<r>', self.rotate_piece)
         self.root.bind('<space>', self.place_piece)
 
+    """
+    # Draw the game 
+    """
     def draw(self):
         if self.headless:
             return
@@ -92,6 +98,11 @@ class Game:
     def move_up(self, event):
         self._move_piece(0, -1)
 
+    """
+    # Move the current piece
+    # @param dx: the x coordinate
+    # @param dy: the y coordinate
+    """
     def _move_piece(self, dx, dy):
         if self.grid.can_place(self.next_shapes[self.piece_num].shape,
                                self.current_x + dx, self.current_y + dy):
@@ -99,16 +110,25 @@ class Game:
             self.current_y += dy
             self.draw()
 
+    """
+    # Rotate the current piece
+    """
     def rotate_piece(self, event):
         if self.next_shapes:
             self.piece_num = (self.piece_num + 1) % len(self.next_shapes)
             self.draw()
 
+    """
+    # Place the current piece in the board if the placement is valid
+    """
     def place_piece(self, event):
         self.place_part_in_board_if_valid(self.current_x, self.current_y)
 
     ########## GAME LOGIC ##########
 
+    """
+    # Add the next shapes to the game
+    """
     def add_next_shapes(self):
         while len(self.next_shapes) < 3:
             new_shape = Shape()
@@ -116,14 +136,16 @@ class Game:
                 new_shape = Shape()
             self.next_shapes.append(new_shape)
 
+    """
     # get coordinates and check if the placement of self.next_shapes[self.piece_num] is valid
     # if so, place the shape in the board and clear lines if needed and update the score
+    # @param action: the action to take
+    """
     def place_part_in_board_if_valid_by_shape(self, action):
         if action is None:
             return
         x, y, piece_num, next_shapes = action[1].action
         shape = next_shapes[piece_num]
-        # print(self.next_shapes)
         if shape not in self.next_shapes:
             return
         if self.grid.can_place(shape.shape, x, y, check_placement=True):
@@ -139,9 +161,12 @@ class Game:
             else:
                 self.piece_num = min(self.piece_num, len(self.next_shapes) - 1)
             self.current_x, self.current_y = 0, 0
-
+    """
     # get coordinates and check if the placement of self.next_shapes[self.piece_num] is valid
     # if so, place the shape in the board and clear lines if needed and update the score
+    # @param x: the x coordinate
+    # @param y: the y coordinate
+    """
     def place_part_in_board_if_valid(self, x, y):
         if self.grid.can_place(self.next_shapes[self.piece_num].shape, x, y,
                                check_placement=True):
@@ -157,14 +182,22 @@ class Game:
             else:
                 self.piece_num = min(self.piece_num, len(self.next_shapes) - 1)
             self.current_x, self.current_y = 0, 0
-            # self.draw() #todo why her?
 
+    """
+    # Check if there is a valid placement for the next shapes
+    # @return: True if there is a valid placement, False otherwise
+    """
     def has_valid_placement(self):
         for shape in self.next_shapes:
             if self.get_board_available_places(shape.shape):
                 return True
         return False
 
+    """
+    # Get the available places to place a shape on the board
+    # @param shape: the shape to place
+    # @return: a list of tuples, where each tuple contains the x and y coordinates of a valid placement
+    """
     def get_board_available_places(self, shape):  # for bfs/dfs
         available_places = []
         for y in range(self.grid.height):
@@ -173,6 +206,10 @@ class Game:
                     available_places.append((x, y))
         return available_places
 
+    """
+    # Get the number of empty cells in the grid
+    # @return: the number of empty cells in the grid
+    """
     def get_empty_cells(self):
         empty_cells = 0
         for row in self.grid.grid:
@@ -184,6 +221,9 @@ class Game:
     def is_game_over(self):
         return not self.has_valid_placement()
 
+    """
+    # Display the game over screen
+    """
     def display_game_over(self):
         if self.headless:
             return
@@ -198,6 +238,9 @@ class Game:
         self.root.update()
         self.root.after(3000, self.root.quit)
 
+    """
+    # Run the game
+    """
     def run(self):
         while self.running:
             self.draw()
@@ -205,7 +248,11 @@ class Game:
                 self.display_game_over()
                 self.running = False
         self.root.mainloop()
-
+    """
+    # Run the game from a list of nodes. This is used for the DFS, BFS and A* algorithms
+    # @param nodes: a list of nodes to run
+    # @return: the score
+    """
     def run_from_code(self, nodes):
         for node in nodes:
             self.piece_num = node.action[2]
@@ -222,10 +269,17 @@ class Game:
 
     ########## HELPER FUNCTIONS ##########
 
+    """
+    # Get the current board state
+    # @return: the current board state
+    """
     def get_board(self):
         return self.grid.grid
 
-
+    """
+    # Get the current score
+    # @return: the current score
+    """
     def get_score(self):
         return self.score
 
@@ -333,6 +387,7 @@ def depth_first_search(problem):
     stack = Stack()
     return bfs_dfs_helper(stack, problem)
 
+
 """
 # BFS search
 # @param problem: the problem to solve
@@ -341,6 +396,7 @@ def depth_first_search(problem):
 def breadth_first_search(problem):
     queue = Queue()
     return bfs_dfs_helper(queue, problem)
+
 
 """
 # Helper function for BFS and DFS
@@ -406,6 +462,7 @@ def track_memory_and_time_(game_instance):
     # Return the time taken and peak memory usage
     return end_time - start_time, peak / 1024 / 1024  # time in seconds, memory in MB
 
+
 """
 # run multiple times For data collection
 # @param game_instance: the game instance to solve
@@ -440,6 +497,10 @@ def run_multiple_times(game_instance):
     return avg_time, avg_memory
 
 
+"""
+# get arguments from the user
+# @return: the arguments
+"""
 def get_parser():
     global args
     parser = argparse.ArgumentParser(description='10x10 Game')
@@ -497,7 +558,8 @@ if __name__ == '__main__':
     elif args.format == 'A_star':
         solution_path = Astar.a_star_search(initial_game, Heuristics.heuristic)
     elif args.format == 'agent':
-        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display, sleep_between_actions=initial_game.sleep_between_actions)
+        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display,
+                                               sleep_between_actions=initial_game.sleep_between_actions)
         score = game_runner.run(initial_game)
     elif args.format == 'BFS':
         solution_path, grid = breadth_first_search(initial_game)
