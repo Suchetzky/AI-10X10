@@ -5,20 +5,11 @@ import numpy as np
 
 class Heuristics:
     _instance = None
-    # holes_weight = 0
-    # empty_cells_weight = 0
-    # smoothness_weight = -1
-    # monotonicity_weight = 0
-    # merges_weight = 0
-    # sum_close_coordinates_values_weight = 0
-    # count_valid_moves_weight = 0
-
     holes_weight = random.randint(-10, 0)
     empty_cells_weight = random.randint(-10, 0)
     smoothness_weight = random.randint(0, 10)
     monotonicity_weight = random.randint(0, 10)
     merges_weight = random.randint(0, 10)
-    # sum_close_coordinates_values_weight = random.randint(-10, 10)
     count_valid_moves_weight = random.randint(0, 10)
     blocks = 1
     weights = [holes_weight,
@@ -26,7 +17,6 @@ class Heuristics:
                smoothness_weight,
                monotonicity_weight,
                merges_weight,
-               # sum_close_coordinates_values_weight,
                count_valid_moves_weight
                ]
 
@@ -44,34 +34,6 @@ class Heuristics:
         cls.merges_weight = random.randint(-1, 1)
         cls.count_valid_moves_weight = random.randint(-1, 1)
         cls.blocks = random.randint(-1, 1)
-
-        # cls.holes_weight = 10.47743174
-        # cls.empty_cells_weight =  30.83350653
-        # cls.smoothness_weight = -12.93670911
-        # cls.monotonicity_weight = 1.35595286
-        # cls.merges_weight = 21.96272877
-        # cls.count_valid_moves_weight = 19.15243476
-
-        # cls.holes_weight = 0.45567818
-        # cls.empty_cells_weight =  17.65677899
-        # cls.smoothness_weight = 9.99443012
-        # cls.monotonicity_weight = -10.71075892
-        # cls.merges_weight = 2.9763484
-        # cls.count_valid_moves_weight = -1.80218795
-        # -1,-1,-1,-1,0,1
-        # cls.holes_weight = -1
-        # cls.empty_cells_weight = -1
-        # cls.smoothness_weight = -1
-        # cls.monotonicity_weight = -1
-        # cls.merges_weight = 0
-        # cls.count_valid_moves_weight = 1
-        # -6.8106172   29.62203142   9.12958048 -15.96431503   6.7293583  1.6178059
-        # cls.holes_weight = -6.8106172
-        # cls.empty_cells_weight = 29.62203142
-        # cls.smoothness_weight = 9.12958048
-        # cls.monotonicity_weight = -15.96431503
-        # cls.merges_weight = 6.7293583
-        # cls.count_valid_moves_weight = 1.6178059
         cls.weights = [cls.holes_weight, cls.empty_cells_weight,
                        cls.smoothness_weight, cls.monotonicity_weight,
                        cls.merges_weight, cls.count_valid_moves_weight,
@@ -80,6 +42,12 @@ class Heuristics:
 
     @staticmethod
     def heuristic_blocks(board):
+        """
+        Heuristic function that evaluates the board based on the number of 2x2 blocks
+        
+        :param board: 
+        :return: 
+        """
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -120,8 +88,19 @@ class Heuristics:
 
     @staticmethod
     def holes(board):
+        """
+        Calculate the number of holes in the board.
+        
+        A hole is defined as an empty cell (represented by 0) that is surrounded by occupied cells (represented by 1) on all four sides (up, down, left, and right).
+        
+        Parameters:
+        board (Board): The board object containing the grid to be evaluated.
+        
+        Returns:
+        int: The total number of holes in the board.
+        """
         # Calculate the number of holes in the board
-        holes = 0
+        holes = 25
         for col in range(board.width):
             for row in range(board.height):
                 # If the cell is empty and the cells around are full
@@ -132,30 +111,8 @@ class Heuristics:
                         (col - 1 <= 0 or board.grid[row][col - 1] == 1) and
                         (col + 1 >= board.height or board.grid[row][
                             col + 1] == 1)):
-                    holes += 1
+                    holes -= 1
         return holes
-
-    # @staticmethod
-    # def bumpiness_cols(board):
-    #     # Calculate the bumpiness of the board
-    #     # bumpiness = 0
-    #     # for col in range(board.width - 1):
-    #     #     bumpiness += abs(sum([board.grid[row][col] for row in
-    #     #                           range(board.height)]) - sum(
-    #     #         [board.grid[row][col + 1] for row in range(board.height)]))
-    #     # return bumpiness
-    #     col_sums = np.sum(board.grid, axis=0)
-    #     return np.sum(np.abs(np.diff(col_sums)))
-    # 
-    # @staticmethod
-    # def bumpiness_rows(board):
-    #     # Calculate rows bumpiness
-    #     # bumpiness = 0
-    #     # for row in range(board.height):
-    #     #     bumpiness += abs(sum(board.grid[row]) - sum(board.grid[row]))
-    #     # return bumpiness
-    #     row_sums = np.sum(board.grid, axis=1)
-    #     return np.sum(np.abs(np.diff(row_sums)))
 
     @staticmethod
     def empty_cells(board):
@@ -203,7 +160,7 @@ class Heuristics:
         return valid_moves
 
     @staticmethod
-    def heuristic1_adjacent_pairs(board):
+    def adjacent_pairs(board):
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -303,17 +260,23 @@ class Heuristics:
         return total_probability
 
     @staticmethod
-    def heuristic(board):
-        # add weights to the different heuristics    
-        # return Heuristics.heuristic1_adjacent_pairs(
-        #     board) * 0.124 + Heuristics.heuristic2_2x2_blocks(
-        #     board) * 0.186 + Heuristics.large_shape_fit_heuristic(
-        #     board) * 0.156 + Heuristics.sub_board_analysis_heuristic(
-        #     board) * 0.534
-        return 0.7 * Heuristics.heuristic_blocks(board) + 0.3 * Heuristics.snack(board)
-
-    @staticmethod
     def snack(board):
+        """
+        Calculate the score based on consecutive 2x2 blocks that are either fully occupied or fully empty.
+        
+        This function iterates over the board grid and evaluates each 2x2 block of cells.
+        It assigns a score based on the number of consecutive fully occupied or fully empty 2x2 blocks.
+        
+        Scoring rules:
+        - Increment `score_full` by 1 for each consecutive 2x2 block that is fully occupied.
+        - Increment `score_empty` by 1 for each consecutive 2x2 block that is fully empty.
+        
+        Parameters:
+        board (Board): The board object containing the grid to be evaluated.
+        
+        Returns:
+        int: The total score based on the evaluation of consecutive fully occupied or fully empty 2x2 blocks.
+        """ 
         score_full = 1
         score_empty = 1
         prev_occupied_count = [board.grid[0][0], board.grid[0][1],
@@ -330,15 +293,7 @@ class Heuristics:
                     score_empty = score_empty + 1
                 prev_occupied_count = occupied_count
         return score_full + score_empty
-        # return (Heuristics.holes_weight * Heuristics.holes(board) +
-        #                 Heuristics.empty_cells_weight * Heuristics.empty_cells(board) +
-        #                 Heuristics.smoothness_weight * Heuristics.calculate_smoothness(board) +
-        #                 Heuristics.monotonicity_weight * Heuristics.calculate_monotonicity(board) +
-        #                 Heuristics.merges_weight * Heuristics.count_merge_opportunities(board) +
-        #                 Heuristics.blocks * Heuristics.heuristic2_2x2_blocks(board) +
-        #                 Heuristics.count_valid_moves_weight * Heuristics.count_valid_moves(board))
-        #
-    
-# Average Time Taken: 609.9167 seconds
-# Average Memory Used: 0.9288 MB
-# Average Score: 6409.0000
+
+    @staticmethod
+    def heuristic(board):
+        return 0.5 * Heuristics.heuristic_blocks(board) + 0.25 * Heuristics.snack(board) + 0.25 * Heuristics.holes(board)
