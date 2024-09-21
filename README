@@ -1,0 +1,24 @@
+How to run the game and our code:
+By following these steps, you can run the project with different configurations directly from the terminal.
+1.	Navigate to the Project Directory
+2.	For playing the game run the file Game.py (use ARROWS to move, R to change piece and SPACE to place.)
+Python Game.py
+Available Options:
+• --display: Set to True for a graphical UI, or False for running without a display (default is True).
+• --format: Specify the format of the game. Available options are:
+•	play (default)
+•	DFS (Depth First Search)
+•	A_star (A* algorithm)
+•	agent (runs the game with an AI agent)
+•	--agent: If using the agent format, choose an AI agent: NextMoveMaximizer Agent, AlphaBetaAgent, or ExpectimaxAgent (default is AlphaBetaAgent).
+•	--depth: Set the depth for searching the game tree (default is 1).
+•	--sleep_between_actions: Specify whether to pause between actions (default is False).
+•	--score_goal: Set the score goal for the DFS and A* formats (default is 10000).
+
+For example:
+1.	To run the game using Depth First Search (DFS) with a score goal of 5000:
+python Game.py --format DFS --score_goal 5000 --display True
+2.	To run the game using A* search with a score goal of 10000 without GUI:
+python Game.py --format A_star --display False
+3.	To run the game using the AlphaBetaAgent with a depth of 1:
+python Game.py --format agent --agent AlphaBetaAgent --depth 1 --display True
