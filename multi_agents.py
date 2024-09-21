@@ -10,10 +10,13 @@ import pandas as pd
 """
 
 """
+
+
 class Agent(object):
     """
     an abstract class for the agents
     """
+
     def __init__(self):
         super(Agent, self).__init__()
 
@@ -29,16 +32,16 @@ class ReflexAgent(Agent):
     """
     Reflex agent class to implement the agents
     """
+
     def get_action(self, game_state):
         # Collect legal moves and successor states
         legal_moves = game_state.get_successors()
 
         # Choose one of the best actions
-        scores = [self.evaluation_function(game_state, action_stat, action) for
+        scores = [self.evaluation_function(game_state) for
                   action_stat, action in legal_moves]
         if len(scores) == 0:
-            return Action.STOP, self.evaluation_function(game_state, game_state,
-                                                         None)
+            return Action.STOP, self.evaluation_function(game_state)
         best_score = max(scores)
         best_indices = [index for index in range(len(scores)) if
                         scores[index] == best_score]
@@ -46,7 +49,6 @@ class ReflexAgent(Agent):
             best_indices)  # Pick randomly among the best
 
         return legal_moves[chosen_index], best_score
-
 
     def evaluation_function(self, action_stat):
         """
@@ -72,9 +74,9 @@ class MultiAgentSearchAgent(Agent):
     MultiAgentSearchAgent class to implement the agents
     """
 
-    def __init__(self, evaluation_function='score_evaluation_function',
-                 depth=2):
+    def __init__(self, evaluation_function='score_evaluation_function', depth=2):
         # self.evaluation_function = util.lookup(evaluation_function, globals())
+        super().__init__()
         self.evaluation_function = evaluation_function
         self.depth = depth
 
@@ -87,6 +89,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
     """
     Minmax agent class to implement the agents
     """
+
     def get_action(self, game_state):
         return self.minimax(game_state, self.depth, 0)
 
@@ -121,6 +124,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     AlphaBeta agent class to implement the agents
     """
+
     def get_action(self, game_state):
         return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
 
@@ -166,6 +170,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     """
     Expectimax agent class to implement the agents
     """
+
     def get_action(self, game_state):
         return self.expectimax(game_state, self.depth, True)
 
@@ -197,6 +202,7 @@ class NextMoveMaximizerAgent(MultiAgentSearchAgent):
     """
     NextMoveMaximizer agent class to implement the agents
     """
+
     def get_action(self, game_state):
         if len(game_state.next_shapes) == 0:
             self.depth = 1
@@ -218,19 +224,19 @@ class NextMoveMaximizerAgent(MultiAgentSearchAgent):
         return max_action, score
 
 
-class Game_runner(object):
+class GameRunner(object):
     """
     Game runner class to run the game
     """
+
     def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(),
                  sleep_between_actions=True, draw=True):
-        super(Game_runner, self).__init__()
+        super(GameRunner, self).__init__()
         self.sleep_between_actions = sleep_between_actions
         self.agent = agent
         self.opponent_agent = opponent_agent
         self._state = None
         self.draw = draw
-
 
     def run(self, initial_state):
         """
@@ -243,8 +249,7 @@ class Game_runner(object):
             action, score = self.agent.get_action(self._state)
             if action is None or action[0].is_goal_state():
                 return self._state.get_score()
-            self._state.place_part_in_board_if_valid_by_shape(
-                action)  # apply action
+            self._state.place_part_in_board_if_valid_by_shape(action)  # apply action
             if self.draw:
                 self._state.draw()
             if self.sleep_between_actions:
@@ -281,9 +286,7 @@ def run_multiple_times(game_instance, x):
         results.append([time_taken, memory_used, score])
 
     # Convert results to a DataFrame
-    df = pd.DataFrame(results,
-                      columns=["Time Taken (seconds)", "Memory Used (MB)",
-                               "Score"])
+    df = pd.DataFrame(results, columns=["Time Taken (seconds)", "Memory Used (MB)", "Score"])
 
     # Calculate the averages
     avg_time = df["Time Taken (seconds)"].mean()
@@ -309,7 +312,7 @@ def track_memory_and_time_for_agent(game_instance):
     # Run depth_first_search
     agent = NextMoveMaximizerAgent(depth=2)
     opponent_agent = NextMoveMaximizerAgent(depth=2)
-    game_runner = Game_runner(agent, opponent_agent, draw=True)
+    game_runner = GameRunner(agent, opponent_agent, draw=True)
     score = game_runner.run(game_instance)
     # Stop the timer
     end_time = time.time()

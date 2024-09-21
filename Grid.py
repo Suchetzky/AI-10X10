@@ -59,7 +59,7 @@ class Grid:
         for row in range(len(shape)):
             for col in range(len(shape[0])):
                 if shape[row][col] == 1:
-                    if (x + col >= self.width or y + row >= self.height or x + col < 0 or y + row < 0):
+                    if x + col >= self.width or y + row >= self.height or x + col < 0 or y + row < 0:
                         return False
                     if check_placement and self.grid[y + row][x + col] == 1:
                         return False

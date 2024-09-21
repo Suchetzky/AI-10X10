@@ -566,8 +566,8 @@ if __name__ == '__main__':
     elif args.format == 'A_star':
         solution_path = Astar.a_star_search(initial_game, Heuristics.heuristic)
     elif args.format == 'agent':
-        game_runner = multi_agents.Game_runner(agent, agent, draw=args.display,
-                                               sleep_between_actions=initial_game.sleep_between_actions)
+        game_runner = multi_agents.GameRunner(agent, agent, draw=args.display,
+                                              sleep_between_actions=initial_game.sleep_between_actions)
         score = game_runner.run(initial_game)
     elif args.format == 'BFS':
         solution_path, grid = breadth_first_search(initial_game)

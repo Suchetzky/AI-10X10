@@ -16,8 +16,7 @@ class Heuristics:
                smoothness_weight,
                monotonicity_weight,
                merges_weight,
-               count_valid_moves_weight
-               ]
+               count_valid_moves_weight]
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -71,10 +70,10 @@ class Heuristics:
                     score += 3
                 elif (block[0] == block[1] and block[2] == block[3]) or (
                         block[0] == block[2] and block[1] == block[3]):
-                    # Second best score: One row or one column is fully filled or fully empty
+                    # Second-best score: One row or one column is fully filled or fully empty
                     score += 2
                 elif occupied_count == 3 or occupied_count == 1:
-                    # Third best score: Three cells are filled and one is empty, or vice versa
+                    # Third-best score: Three cells are filled and one is empty, or vice versa
                     score += 1
                 elif occupied_count == 2:
                     # Worst score: every Adjacent cells are different
