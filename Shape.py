@@ -172,7 +172,7 @@ class Shape:
                     y2 = y1 + size
                     canvas.create_rectangle(x1, y1, x2, y2, fill=red, outline=blue)
 
-    def rotate(self): ## todo change shape?
+    def rotate(self):
         self.shape = list(zip(*self.shape[::-1]))
 
     def get_part_size(self):

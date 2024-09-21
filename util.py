@@ -6,9 +6,10 @@
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
-import sys
+import heapq
 import inspect
-import heapq, random
+import random
+import sys
 
 """
  Data structures useful for implementing SearchAgents
@@ -538,7 +539,7 @@ class TimeoutFunction:
         return result
 
 class Node:
-    STOP = None # todo: change this to the stop action
+    STOP = None
 
     def __init__(self, action):
         """

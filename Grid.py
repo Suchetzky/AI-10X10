@@ -5,11 +5,12 @@ black = 'black'
 white = 'white'
 blue = 'blue'
 
+
 class Grid:
     def __init__(self, width, height, size):
         self.width = width
         self.height = height
-        self.size = size # todo: size of each cell?
+        self.size = size
         self.grid = [[0 for _ in range(width)] for _ in range(height)]
 
     def draw(self, canvas: Canvas):
@@ -44,7 +45,7 @@ class Grid:
     def clear_lines(self):
         rows_to_clear = []
         columns_to_clear = []
-        
+
         # save all rows that need to be cleared
         for row in range(self.height):
             if all(self.grid[row]):
@@ -54,15 +55,14 @@ class Grid:
         for col in range(self.width):
             if all([self.grid[row][col] for row in range(self.height)]):
                 columns_to_clear.append(col)
-       
-       # clear all rows and columns
+
+        # clear all rows and columns
         for row in rows_to_clear:
             self.clear_single_line(row)
-        
+
         for col in columns_to_clear:
             self.clear_single_column(col)
-        
-            
+
         return self.width * (len(rows_to_clear) + len(columns_to_clear))
 
     def clear_single_column(self, col):
