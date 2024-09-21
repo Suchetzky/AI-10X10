@@ -53,6 +53,7 @@ class PriorityQueue:
       in quick retrieval of the lowest-priority item in the queue. This
       data structure allows O(1) access to the lowest-priority item.
     """
+
     def __init__(self):
         self.heap = []
         self.init = False
@@ -79,7 +80,7 @@ class PriorityQueue:
 
     def isEmpty(self):
         return len(self.heap) == 0
-    
+
     def push_and_keep_n_largest(self, item, priority, n):
         """
         Pushes the item with the given priority into the priority queue.
@@ -105,8 +106,11 @@ class PriorityQueueWithFunction(PriorityQueue):
         PriorityQueue.__init__(self)  # super-class initializer
 
     def push(self, item):
-        "Adds an item to the queue with priority from the priority function"
+        """
+        Adds an item to the queue with priority from the priority function
+        """
         PriorityQueue.push(self, item, self.priorityFunction(item))
+
 
 class Node:
     STOP = None
