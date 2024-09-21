@@ -7,6 +7,9 @@ blue = 'blue'
 
 
 class Grid:
+    """
+    A class to represent the game board.
+    """
     def __init__(self, width, height, size):
         self.width = width
         self.height = height
@@ -14,6 +17,11 @@ class Grid:
         self.grid = [[0 for _ in range(width)] for _ in range(height)]
 
     def draw(self, canvas: Canvas):
+        """
+        Draw the game board.
+        :param canvas:
+        :return:
+        """
         for row in range(self.height):
             for col in range(self.width):
                 color = white if self.grid[row][col] == 0 else blue
@@ -24,15 +32,30 @@ class Grid:
                 canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=black)
 
     def place_shape(self, shape, x, y):
+        """
+        Place the shape on the board.
+        :param shape: the shape to be placed
+        :param x: the x coordinate of the shape
+        :param y: the y coordinate of the shape
+        :return:
+        """
         for row in range(len(shape)):
             for col in range(len(shape[0])):
                 if shape[row][col] == 1:
                     self.grid[y + row][x + col] = 1
 
-    # return all available index for a shape in the board just border check not the actual placement
-    # if check_placement is True, it will also check if the shape can be placed in the board todo: check
-    # shape is a list of lists not Shape!
+
     def can_place(self, shape, x, y, check_placement=False):
+        """
+        return all available index for a shape in the board just border check not the actual placement
+        if check_placement is True, it will also check if the shape can be placed in the board
+        shape is a list of lists not Shape!
+        :param shape:
+        :param x:
+        :param y:
+        :param check_placement:
+        :return:
+        """
         for row in range(len(shape)):
             for col in range(len(shape[0])):
                 if shape[row][col] == 1:
@@ -43,6 +66,10 @@ class Grid:
         return True
 
     def clear_lines(self):
+        """
+        Clear all full lines and columns.
+        :return:
+        """
         rows_to_clear = []
         columns_to_clear = []
 
