@@ -60,7 +60,7 @@ class Heuristics:
                          board.grid[i + 1][j],
                          board.grid[i + 1][j + 1]]
                 occupied_count = block.count(
-                    1)  # Assuming 1 represents smooth, 0 represents empty
+                    1)  # Assuming 1 represents filled, 0 represents empty
 
                 if occupied_count == 4 or occupied_count == 0:
                     # Best score: all 4 are either filled or empty
