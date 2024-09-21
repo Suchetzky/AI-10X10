@@ -45,38 +45,38 @@ class Heuristics:
 
     """
     # Heuristic function that evaluates the quality of partials boards blocks, rewarding 
-    # smoothness blocks, penalizing holes and empty cells. 
+    # smoothness blocks- Adjacent filled/empty cells, penalizing holes and empty cells. 
     """
     @staticmethod
-    def heuristic_blocks(board):
+    def combined_heuristic(board):
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
 
         for i in range(rows - 1):
             for j in range(cols - 1):
-                # Get the 2x2 block
+                # Get the partials block
                 block = [board.grid[i][j], board.grid[i][j + 1],
                          board.grid[i + 1][j],
                          board.grid[i + 1][j + 1]]
                 occupied_count = block.count(
-                    1)  # Assuming 1 represents occupied, 0 represents empty
+                    1)  # Assuming 1 represents smooth, 0 represents empty
 
                 if occupied_count == 4 or occupied_count == 0:
-                    # Best score: all 4 are either occupied or empty
+                    # Best score: all 4 are either filled or empty
                     score += 3
                 elif (block[0] == block[1] and block[2] == block[3]) or (
                         block[0] == block[2] and block[1] == block[3]):
-                    # Second best score: One row or one column is fully occupied or fully empty
+                    # Second best score: One row or one column is fully filled or fully empty
                     score += 2
                 elif occupied_count == 3 or occupied_count == 1:
-                    # Third best score: Three cells are occupied and one is empty, or vice versa
+                    # Third best score: Three cells are filled and one is empty, or vice versa
                     score += 1
                 elif occupied_count == 2:
-                    # Worst score: chessboard-like pattern
+                    # Worst score: every Adjacent cells are different
                     if (block[0] != block[1]) and (block[2] != block[3]) and (
                             block[0] != block[2]):
-                        score -= 1  # Penalty for chessboard-like patterns
+                        score -= 1
 
         return score
 
@@ -286,4 +286,4 @@ class Heuristics:
 
     @staticmethod
     def heuristic(board):
-        return 0.5 * Heuristics.heuristic_blocks(board) + 0.25 * Heuristics.snack(board) + 0.25 * Heuristics.holes(board)
+        return 0.5 * Heuristics.combined_heuristic(board) + 0.25 * Heuristics.snack(board) + 0.25 * Heuristics.holes(board)
