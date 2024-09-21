@@ -44,7 +44,7 @@ class Heuristics:
         return cls.weights
 
     """
-    # Heuristic function that evaluates the quality of partials boards blocks, rewarding 
+    # Heuristic function that evaluates the quality of Adjacent partials boards blocks, rewarding 
     # smoothness blocks- Adjacent filled/empty cells, penalizing holes. 
     """
     @staticmethod
