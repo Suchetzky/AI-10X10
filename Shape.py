@@ -163,6 +163,14 @@ class Shape:
             self.shape = random.choice(self.shapes)
 
     def draw(self, canvas: Canvas, x, y, size):
+        """
+        Draw the shape on the canvas
+        :param canvas: canvas to draw on
+        :param x: x coordinate of the shape
+        :param y: y coordinate of the shape
+        :param size: size of the shape
+        :return:
+        """
         for row in range(len(self.shape)):
             for col in range(len(self.shape[0])):
                 if self.shape[row][col] == 1:
