@@ -48,7 +48,7 @@ class Heuristics:
     # smoothness blocks- Adjacent filled/empty cells, penalizing holes. 
     """
     @staticmethod
-    def combined_heuristic(board):
+    def blocks_heuristic(board):
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -286,4 +286,4 @@ class Heuristics:
 
     @staticmethod
     def heuristic(board):
-        return 0.5 * Heuristics.combined_heuristic(board) + 0.25 * Heuristics.snack(board) + 0.25 * Heuristics.holes(board)
+        return 0.5 * Heuristics.blocks_heuristic(board) + 0.25 * Heuristics.snack(board) + 0.25 * Heuristics.holes(board)
