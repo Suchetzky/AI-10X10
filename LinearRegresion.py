@@ -4,6 +4,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 def linear_regression_model():
+    """
+    This function reads the data from data.csv file, splits the data into training and testing sets,
+    :return: the learned weights (coefficients) of the linear regression model
+    """
     data = pd.read_csv('data.csv')
     
     X = data.iloc[:, :-1].values  
