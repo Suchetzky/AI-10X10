@@ -8,9 +8,12 @@ import time
 import pandas as pd
 
 """
-# Agent class to implement the agents
+
 """
 class Agent(object):
+    """
+    an abstract class for the agents
+    """
     def __init__(self):
         super(Agent, self).__init__()
 
@@ -21,10 +24,11 @@ class Agent(object):
     def stop_running(self):
         pass
 
-"""
-# ReflexAgent class 
-"""
+
 class ReflexAgent(Agent):
+    """
+    Reflex agent class to implement the agents
+    """
     def get_action(self, game_state):
         # Collect legal moves and successor states
         legal_moves = game_state.get_successors()
@@ -43,27 +47,30 @@ class ReflexAgent(Agent):
 
         return legal_moves[chosen_index], best_score
 
-    """
-    # Helper function to evaluate the score of the game state
-    # @param current_game_state: The current game state
-    # @return: The score of the heuristic function and the current game state
-    """
+
     def evaluation_function(self, action_stat):
+        """
+        function to evaluate the score of the game state
+        :param action_stat: The current game state
+        :return: The score of the heuristic function and the current game state
+        """
         return action_stat.get_score()
 
-"""
-# Helper function to evaluate the score of the game state
-# @param current_game_state: The current game state
-# @return: The score of the heuristic function and the current game state
-"""
+
 def score_evaluation_function(current_game_state):
+    """
+    function to evaluate the score of the game state
+    :param current_game_state: The current game state
+    :return: The score of the heuristic function and the current game state
+    """
     h = Heuristics()
     return h.heuristic(current_game_state.grid) + current_game_state.get_score()
 
-"""
-# MultiAgentSearchAgent class to implement the agents
-"""
+
 class MultiAgentSearchAgent(Agent):
+    """
+    MultiAgentSearchAgent class to implement the agents
+    """
 
     def __init__(self, evaluation_function='score_evaluation_function',
                  depth=2):
@@ -75,10 +82,11 @@ class MultiAgentSearchAgent(Agent):
     def get_action(self, game_state):
         return
 
-"""
-# Minmax agent
-"""
+
 class MinmaxAgent(MultiAgentSearchAgent):
+    """
+    Minmax agent class to implement the agents
+    """
     def get_action(self, game_state):
         return self.minimax(game_state, self.depth, 0)
 
@@ -86,9 +94,9 @@ class MinmaxAgent(MultiAgentSearchAgent):
         if depth == 0:
             return action, score_evaluation_function(game_state)
         if param == 0:
-            return self.max_value(game_state, depth, param)
+            return self.max_value(game_state, depth)
         else:
-            return self.min_value(game_state, depth, param)
+            return self.min_value(game_state, depth)
 
     def max_value(self, game_state, depth):
         score = float('-inf')
@@ -108,10 +116,11 @@ class MinmaxAgent(MultiAgentSearchAgent):
                 score = v
         return None, score
 
-"""
-# AlphaBeta agent
-"""
+
 class AlphaBetaAgent(MultiAgentSearchAgent):
+    """
+    AlphaBeta agent class to implement the agents
+    """
     def get_action(self, game_state):
         return self.alphabeta(game_state, self.depth, -np.inf, np.inf)
 
@@ -152,10 +161,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 break
         return None, score
 
-"""
-# Expectimax agent
-"""
+
 class ExpectimaxAgent(MultiAgentSearchAgent):
+    """
+    Expectimax agent class to implement the agents
+    """
     def get_action(self, game_state):
         return self.expectimax(game_state, self.depth, True)
 
@@ -182,10 +192,11 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 return None, score_evaluation_function(game_state)
             return None, score / len(actions)
 
-"""
-# Greedy agent
-"""
+
 class NextMoveMaximizerAgent(MultiAgentSearchAgent):
+    """
+    NextMoveMaximizer agent class to implement the agents
+    """
     def get_action(self, game_state):
         if len(game_state.next_shapes) == 0:
             self.depth = 1
@@ -206,10 +217,11 @@ class NextMoveMaximizerAgent(MultiAgentSearchAgent):
                 max_action = action
         return max_action, score
 
-"""
-# Game runner class to run the game
-"""
+
 class Game_runner(object):
+    """
+    Game runner class to run the game
+    """
     def __init__(self, agent=ReflexAgent(), opponent_agent=ReflexAgent(),
                  sleep_between_actions=True, draw=True):
         super(Game_runner, self).__init__()
@@ -219,12 +231,13 @@ class Game_runner(object):
         self._state = None
         self.draw = draw
 
-    """
-    # Run the game with agents
-    # @param initial_state: The initial state of the game
-    # @return: The score of the game
-    """
+
     def run(self, initial_state):
+        """
+        Run the game with agents
+        :param initial_state: The initial state of the game
+        :return: The score of the game
+        """
         self._state = initial_state
         while not self._state.is_goal_state():
             action, score = self.agent.get_action(self._state)
@@ -245,13 +258,14 @@ class Game_runner(object):
                 time.sleep(1)
         return self._state.get_score()
 
-"""
-# Helper function to run the game multiple times and collect the results
-# @param game_instance: The game instance to run the agent on
-# @param x: The number of times to run the game
-# @return: The average time taken and peak memory usage
-"""
+
 def run_multiple_times(game_instance, x):
+    """
+    Run the game multiple times and collect the results
+    :param game_instance: The game instance to run the agent on
+    :param x: The number of times to run the game
+    :return: The average time taken and peak memory usage
+    """
     # List to store the results
     results = []
 
@@ -280,12 +294,12 @@ def run_multiple_times(game_instance, x):
     return avg_time, avg_memory, avg_score
 
 
-"""
-# Helper function to track memory and time for the agent
-# @param game_instance: The game instance to run the agent on
-# @return: The time taken and peak memory usage
-"""
 def track_memory_and_time_for_agent(game_instance):
+    """
+    Track memory and time for the agent
+    :param game_instance: The game instance to run the agent on
+    :return: The time taken and peak memory usage
+    """
     # Start tracing memory allocations
     tracemalloc.start()
 
