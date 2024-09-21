@@ -24,11 +24,13 @@ class Heuristics:
             cls._instance = super(Heuristics, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
-    """
-    # This function is used for analysis score of the board
-    """
+
     @classmethod
     def random_weights(cls):
+        """
+        This function is used for analysis score of the board
+        :return:
+        """
         cls.holes_weight = random.randint(-1, 1)
         cls.empty_cells_weight = random.randint(-1, 1)
         cls.smoothness_weight = random.randint(-1, 1)
@@ -42,12 +44,15 @@ class Heuristics:
                        cls.blocks]
         return cls.weights
 
-    """
-    # Heuristic function that evaluates the quality of partials boards blocks, rewarding 
-    # smoothness blocks- Adjacent filled/empty cells, penalizing holes. 
-    """
+
     @staticmethod
     def blocks_heuristic(board):
+        """
+        Heuristic function that evaluates the quality of partials boards blocks,
+        rewarding smoothness blocks-Adjacent filled/empty cells, penalizing holes.
+        :param board:
+        :return:
+        """
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -79,11 +84,14 @@ class Heuristics:
 
         return score
 
-    """
-    # write the weights and heuristic value to a csv file, for data analysis
-    """
+
     @classmethod
     def write_weights_to_csv(cls, heuristic_value):
+        """
+        write the weights and heuristic value to a csv file, for data analysis
+        :param heuristic_value:
+        :return:
+        """
         with open('data.csv', 'a') as csvfile:
             for i in range(len(Heuristics.weights)):
                 csvfile.write(f"{Heuristics.weights[i]},")
@@ -117,21 +125,25 @@ class Heuristics:
                     holes -= 1
         return holes
 
-    """
-    # This function is not used in the final implementation, just for testing purposes
-    # Calculate the number of empty cells on the board
-    """
+
     @staticmethod
     def empty_cells(board):
+        """
+        Calculate the number of empty cells on the board.
+        :param board:
+        :return:
+        """
         grid = np.array(board.grid)
         return np.sum(grid == 0)
 
-    """
-    # This function is not used in the final implementation, just for testing purposes
-    # Calculate the smoothness of the board
-    """
+
     @staticmethod
     def calculate_smoothness(board):
+        """
+        Calculate the smoothness of the board
+        :param board:
+        :return:
+        """
         smoothness = 0
         smoothness -= np.sum(
             np.abs(np.diff(board.grid, axis=0)))  # Vertical smoothness
@@ -139,12 +151,14 @@ class Heuristics:
             np.abs(np.diff(board.grid, axis=1)))  # Horizontal smoothness
         return smoothness
 
-    """
-    # This function is not used in the final implementation, just for testing purposes
-    # Calculate the monotonicity of the board
-    """
+
     @staticmethod
     def calculate_monotonicity(board):
+        """
+        Calculate the monotonicity of the board
+        :param board:
+        :return:
+        """
         grid = np.array(board.grid)
         monotonicity = 0
         for row in grid:
@@ -155,12 +169,14 @@ class Heuristics:
                 monotonicity += 1
         return monotonicity
 
-    """
-    # This function is not used in the final implementation, just for testing purposes
-    # Count the number of merge opportunities on the board
-    """
+
     @staticmethod
     def count_merge_opportunities(board):
+        """
+        Count the number of merge opportunities on the board
+        :param board:
+        :return:
+        """
         grid = np.array(board.grid)
         merges = 0
         # Vectorized checking for adjacent merges (rows)
@@ -169,24 +185,28 @@ class Heuristics:
         merges += np.sum(grid[:-1, :] == grid[1:, :])
         return merges
 
-    """
-    # This function is not used in the final implementation, just for testing purposes
-    # Count the number of valid moves on the board
-    """
+
     @staticmethod
     def count_valid_moves(board):
+        """
+        Count the number of valid moves on the board
+        :param board:
+        :return:
+        """
         grid = np.array(board.grid)
         valid_moves = 0
         valid_moves += np.sum(grid[:, :-1] == grid[:, 1:])  # Horizontal
         valid_moves += np.sum(grid[:-1, :] == grid[1:, :])  # Vertical
         return valid_moves
 
-    """
-    # This function is not used in the final implementation, just for testing purposes
-    # Check for adjacent pairs in the board
-    """
+
     @staticmethod
     def adjacent_pairs(board):
+        """
+        Check for adjacent pairs in the board
+        :param board:
+        :return:
+        """
         rows = len(board.grid)
         cols = len(board.grid[0])
         score = 0
@@ -205,12 +225,14 @@ class Heuristics:
 
         return score
 
-    """
-    # This function is not used in the final implementation, just for testing purposes
-    # Check if large blocks can fit in the board
-    """
+
     @staticmethod
     def large_shape_fit_heuristic(board):
+        """
+        Check if large blocks can fit in the board
+        :param board:
+        :return:
+        """
         rows = len(board.grid)
         cols = len(board.grid[0])
         large_block_count = 0
@@ -235,12 +257,18 @@ class Heuristics:
 
         return large_block_count
 
-    """
-    # helper function for large_shape_fit_heuristic
-    # check if a block of size (height, width) can fit starting at (start_row, start_col)
-    """
+
     @staticmethod
     def can_place_block(board, start_row, start_col, height, width):
+        """
+        Check if a block of size (height, width) can fit starting at (start_row, start_col)
+        :param board:
+        :param start_row:
+        :param start_col:
+        :param height:
+        :param width:
+        :return:
+        """
         # Check if a block of size (height, width) can fit starting at (start_row, start_col)
         for i in range(start_row, start_row + height):
             for j in range(start_col, start_col + width):
