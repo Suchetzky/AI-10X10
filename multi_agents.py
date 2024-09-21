@@ -188,7 +188,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 """
 # Greedy agent
 """
-class GreedyAgent(MultiAgentSearchAgent):
+class NextMoveMaximizerAgent(MultiAgentSearchAgent):
     def get_action(self, game_state):
         return self.greedy(game_state, self.depth)
 
@@ -294,8 +294,8 @@ def track_memory_and_time_for_agent(game_instance):
     start_time = time.time()
 
     # Run depth_first_search
-    agent = GreedyAgent(depth=2)
-    opponent_agent = GreedyAgent(depth=2)
+    agent = NextMoveMaximizerAgent(depth=2)
+    opponent_agent = NextMoveMaximizerAgent(depth=2)
     game_runner = Game_runner(agent, opponent_agent, draw=True)
     score = game_runner.run(game_instance)
     # Stop the timer

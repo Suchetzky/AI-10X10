@@ -505,7 +505,7 @@ def get_parser():
     global args
     parser = argparse.ArgumentParser(description='10x10 Game')
     formats = ['play', 'DFS', 'A_star', 'agent', 'BFS']
-    agents = ['GreedyAgent', 'AlphaBetaAgent', 'ExpectimaxAgent']
+    agents = ['NextMoveMaximizerAgent', 'AlphaBetaAgent', 'ExpectimaxAgent']
     t_f = ['True', 'False']
     parser.add_argument("--display",
                         help="The game UI. True for GUI False otherwise",
@@ -538,8 +538,8 @@ if __name__ == '__main__':
     initial_game.goal_state = args.score_goal
     agent = multi_agents.AlphaBetaAgent(depth=args.depth)
     solution_path = []
-    if args.agent == 'GreedyAgent':
-        agent = multi_agents.GreedyAgent()
+    if args.agent == 'NextMoveMaximizerAgent':
+        agent = multi_agents.NextMoveMaximizerAgent()
     elif args.agent == 'AlphaBetaAgent':
         agent = multi_agents.AlphaBetaAgent(depth=args.depth)
     elif args.agent == 'ExpectimaxAgent':
