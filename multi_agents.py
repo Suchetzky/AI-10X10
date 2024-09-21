@@ -187,6 +187,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 """
 class NextMoveMaximizerAgent(MultiAgentSearchAgent):
     def get_action(self, game_state):
+        if len(game_state.next_shapes) == 0:
+            self.depth = 1
         return self.greedy(game_state, self.depth)
 
     def greedy(self, game_state, depth):
