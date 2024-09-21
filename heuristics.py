@@ -45,7 +45,7 @@ class Heuristics:
 
     """
     # Heuristic function that evaluates the quality of partials boards blocks, rewarding 
-    # smoothness blocks- Adjacent filled/empty cells, penalizing holes and empty cells. 
+    # smoothness blocks- Adjacent filled/empty cells, penalizing holes. 
     """
     @staticmethod
     def combined_heuristic(board):
